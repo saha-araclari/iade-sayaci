@@ -120,8 +120,8 @@ nav.bottom .badge{font-variant-numeric:tabular-nums;font-size:.7rem;background:v
 details.day{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 14px}
 details.day summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0}
 details.day summary::-webkit-details-marker{display:none}
-details.day summary .d{font-weight:600}
-details.day summary small{display:block;color:var(--muted);font-weight:500;font-size:.82rem}
+details.day summary .d{font-weight:600;min-width:0;flex:1}
+details.day summary small{display:block;color:var(--muted);font-weight:500;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 details.day summary b{font-family:var(--display);font-size:1.3rem;color:var(--accent);font-variant-numeric:tabular-nums}
 details.day[open] summary{border-bottom:1px solid var(--line)}
 details.day .body{padding:6px 0 14px;display:flex;flex-direction:column;gap:6px}
@@ -150,6 +150,10 @@ body.nosnow .lights{animation:none}
 @media (prefers-reduced-motion:reduce){.snow{display:none}.lights{animation:none}}
 ol.steps,ul.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;line-height:1.45}
 nav.bottom .badge:empty{display:none}
+.hero-in{position:relative}
+.deco{position:absolute;left:50%;top:0;transform:translateX(-50%);height:58px;pointer-events:none;z-index:0}
+.deco svg{height:100%;width:auto;display:block}
+body.nosnow .deco{display:none}
 .toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.85rem;z-index:30;max-width:90vw}
 button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.prod{transition:none}}
@@ -161,6 +165,35 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
 <div class="hero">
   <div class="snow" id="snow" aria-hidden="true"></div>
   <div class="hero-in">
+    <div class="deco" aria-hidden="true"><svg viewBox="0 0 130 66" role="img" aria-label="Noel Baba ve geyik">
+<g stroke="#fff" stroke-opacity=".5" stroke-width="1">
+<!-- geyik -->
+<path d="M16 16 l-4 -9 M16 16 l-1 -10 M14 9 l-5 -1 M20 16 l4 -9 M20 16 l1 -10 M22 9 l5 -1" stroke="#f3d9b1" stroke-opacity="1" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+<ellipse cx="34" cy="38" rx="15" ry="8.5" fill="#8a5a35"/>
+<path d="M22 34 L19 22" stroke="#8a5a35" stroke-opacity="1" stroke-width="7" stroke-linecap="round"/>
+<ellipse cx="17" cy="21" rx="6.5" ry="5.5" fill="#8a5a35"/>
+<circle cx="11.5" cy="22.5" r="2.6" fill="#ff3b3b" stroke="#fff" stroke-opacity=".8"/>
+<circle cx="17" cy="19.5" r="1" fill="#1b1b1b" stroke="none"/>
+<path d="M24 44 l-5 12 M30 46 l-2 12 M40 46 l3 12 M46 43 l6 11" stroke="#6b4426" stroke-opacity="1" stroke-width="3" stroke-linecap="round"/>
+<!-- koşum -->
+<path d="M47 36 Q60 30 72 38" fill="none" stroke="#ffd54a" stroke-opacity="1" stroke-width="1.6"/>
+<!-- kızak -->
+<path d="M68 36 H120 Q122 50 108 52 H76 Q68 50 68 36 Z" fill="#8f0a1c"/>
+<path d="M66 58 H114 Q124 58 124 50" fill="none" stroke="#ffd54a" stroke-opacity="1" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M78 52 v6 M108 52 v6" stroke="#ffd54a" stroke-opacity="1" stroke-width="2"/>
+<!-- Noel Baba -->
+<ellipse cx="96" cy="32" rx="12" ry="11" fill="#e8172d"/>
+<rect x="84" y="33" width="24" height="3.5" fill="#fff" stroke="none"/>
+<circle cx="96" cy="15" r="7" fill="#f2c7a5"/>
+<path d="M89 16 Q96 30 103 16 Q100 21 96 21 Q92 21 89 16 Z" fill="#fff"/>
+<path d="M88.5 12 Q96 -2 104 10 Q108 12 110 8" fill="#e8172d"/>
+<rect x="88" y="10" width="16" height="3.5" rx="1.7" fill="#fff" stroke="none"/>
+<circle cx="110.5" cy="7.5" r="2.6" fill="#fff"/>
+<circle cx="93.5" cy="15" r=".9" fill="#1b1b1b" stroke="none"/><circle cx="98.5" cy="15" r=".9" fill="#1b1b1b" stroke="none"/>
+<!-- hediye çuvalı -->
+<circle cx="114" cy="28" r="7" fill="#7a4a26"/>
+</g>
+</svg></div>
     <header>
       <div><h1 id="title">Saha</h1><div class="date" id="date"></div><div class="wl" id="wl" hidden>● Ekran açık kalıyor</div></div>
       <div class="big"><b id="bigN">0</b><span id="bigL">bu mağaza</span></div>
@@ -557,11 +590,21 @@ function renderGecmis(){
   $("bigN").textContent = S.history.length; $("bigL").textContent = "kayıtlı gün";
   $("histList").innerHTML = S.history.length ? S.history.map((d,k) => {
     const dt = new Date(d.at).toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-    return `<details class="day" ${k===0?"open":""}><summary><span class="d">${dt}<small>${d.stores.length} mağaza</small></span><b>${d.total}</b></summary>
+    return `<details class="day" ${histAsk===d.at?"open":""}><summary><span class="d">${dt}<small>${esc(d.stores.map(s=>s.name).join(" · "))}</small></span><b>${d.total}</b></summary>
       <div class="body">${d.stores.map(s=>`<h3>${s.exact?"★ ":""}${esc(s.name)} · ${s.total} adet</h3><div class="list">${
-        s.lines.map(l=>`<div class="li"><span>${esc(l[0])}</span><b>${l[1]}</b></div>`).join("")}</div>`).join("")}</div></details>`;
+        s.lines.map(l=>`<div class="li"><span>${esc(l[0])}</span><b>${l[1]}</b></div>`).join("")}</div>`).join("")}
+      <div class="row2" style="justify-content:flex-end;padding-top:6px">${histAsk===d.at
+        ? `<span class="row2">Bu gün silinsin mi? <button class="btn danger small" data-hdel="${d.at}">Sil</button><button class="btn ghost small" data-hno>Vazgeç</button></span>`
+        : `<button class="link" data-hask="${d.at}">Bu günü sil</button>`}</div></div></details>`;
   }).join("") : `<div class="card empty">Henüz kayıtlı gün yok. Gün sonunda Dağıtım ekranındaki <b>Yeni güne başla</b> düğmesine dokunduğunda o günün iadeleri buraya kaydedilir.</div>`;
 }
+let histAsk=null;
+document.getElementById("v-gecmis").addEventListener("click", e => {
+  const t=e.target;
+  if (t.closest("[data-hask]")){ e.preventDefault(); histAsk=t.closest("[data-hask]").dataset.hask; render(); }
+  else if (t.closest("[data-hdel]")){ e.preventDefault(); const at=t.closest("[data-hdel]").dataset.hdel; S.history=S.history.filter(d=>d.at!==at); histAsk=null; save(); render(); toast("Gün silindi"); }
+  else if (t.closest("[data-hno]")){ histAsk=null; render(); }
+});
 
 /* Ekran açık kalsın */
 let wakeLock=null;

@@ -8,6 +8,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="İade Sayacı">
 <title>İade Sayacı</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
 :root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font:14px system-ui,-apple-system,sans-serif}
@@ -16,23 +19,33 @@ img{max-width:100%}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
 <style>
-/* Layout: üstte kırmızı yılbaşı bandı (başlık + toplam + kar), altında tek sütun içerik, altta sabit 4 sekmeli gezinme */
+/* Layout: üstte sahne ışıklı kırmızı bant (logo + başlık + toplam), altında tek sütun içerik, altta sabit 4 sekmeli gezinme. Palet: sahne kırmızısı + pastel yeşil + altın */
 :root{
-  --bg:#f6f3f3; --card:#ffffff; --fg:#231416; --muted:#6e5d5f; --line:#eadfe0;
-  --accent:#d71920; --accent-soft:#fde4e4; --star:#a8700a; --star-soft:#fbf0d6; --danger:#7a1218; --ok:#2f7d3f;
+  --bg:#f7f1ee; --glow:#fff7f2; --card:#ffffff; --fg:#2a1114; --muted:#7a6064; --line:#ecdfdc;
+  --accent:#f40009; --accent-soft:#fde3e2; --star:#a8700a; --star-soft:#fbf0d6; --danger:#7a1218; --ok:#2e7d4f;
+  --mint:#a8d8b9; --mint-soft:#e6f4ea; --mint-ink:#1d5e3b; --gold:#f0c35a;
   --hero:#d0102b; --hero-2:#8f0a1c;
+  --hero-line:#3a0002;
+  --btn-fill:linear-gradient(140deg,rgba(246,72,80,.98) 0%,rgba(226,26,36,.96) 45%,rgba(158,10,20,.97) 100%);
+  --btn-rim:rgba(255,160,166,.9);
+  --btn-glass:inset 0 1px 0 rgba(255,255,255,.38),inset 0 0 14px rgba(255,150,155,.28),0 4px 14px rgba(120,0,12,.22);
+  --btn-edge:#5e0004;
+  --hero-bg:var(--btn-fill);
   --display:"Space Grotesk",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#150c0d; --card:#22161a; --fg:#f5ecec; --muted:#b39c9f; --line:#3a2629;
-  --accent:#ff4a4f; --accent-soft:#3d171a; --star:#f0b84a; --star-soft:#3b2c12; --danger:#ff7a6e; --ok:#6cc47e;
+  --bg:#13090b; --glow:#2a1216; --card:#211316; --fg:#f6ecea; --muted:#b89c9f; --line:#3a2327;
+  --accent:#f40009; --accent-soft:#3f1313; --star:#f0b84a; --star-soft:#3b2c12; --danger:#ff7a6e; --ok:#7fd19a;
+  --mint:#8fcca3; --mint-soft:#17301f; --mint-ink:#a6e2bb; --gold:#f0c35a;
   --hero:#a80d24; --hero-2:#5e0714; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#150c0d; --card:#22161a; --fg:#f5ecec; --muted:#b39c9f; --line:#3a2629;
-  --accent:#ff4a4f; --accent-soft:#3d171a; --star:#f0b84a; --star-soft:#3b2c12; --danger:#ff7a6e; --ok:#6cc47e;
+  --bg:#13090b; --glow:#2a1216; --card:#211316; --fg:#f6ecea; --muted:#b89c9f; --line:#3a2327;
+  --accent:#f40009; --accent-soft:#3f1313; --star:#f0b84a; --star-soft:#3b2c12; --danger:#ff7a6e; --ok:#7fd19a;
+  --mint:#8fcca3; --mint-soft:#17301f; --mint-ink:#a6e2bb; --gold:#f0c35a;
   --hero:#a80d24; --hero-2:#5e0714; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--fg)}
+body{background:radial-gradient(130% 55% at 50% 0%,var(--glow) 0%,transparent 70%) no-repeat,var(--bg)}
 body{font-family:var(--body);font-size:15px;-webkit-tap-highlight-color:transparent}
 .wrap{max-width:560px;margin:0 auto;padding-block:14px calc(170px + env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
@@ -50,8 +63,10 @@ header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 select,input[type=text]{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--fg);
   border-radius:12px;padding:12px;font:inherit}
 select{font-weight:600}
-.btn{border:0;border-radius:12px;padding:12px 16px;font:600 .9rem var(--body);cursor:pointer;background:var(--accent);color:var(--bg);white-space:nowrap}
-.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn{border:1.5px solid var(--btn-rim);border-radius:999px;padding:11px 18px;font:600 .9rem var(--body);cursor:pointer;background:var(--btn-fill);color:#fff;white-space:nowrap;box-shadow:var(--btn-glass);text-shadow:0 1px 1px rgba(80,0,8,.25)}
+.btn:active{filter:brightness(.94)}
+
+.btn.ghost{background:var(--btn-fill);color:#fff}
 .btn.danger{background:var(--danger);color:#fff}
 .btn.small{padding:8px 12px;font-size:.82rem}
 .link{background:none;border:0;color:var(--muted);font:500 .85rem var(--body);text-decoration:underline;cursor:pointer;padding:4px}
@@ -60,22 +75,24 @@ label.chk input{width:22px;height:22px;accent-color:var(--star)}
 .tag{display:inline-flex;align-items:center;gap:4px;background:var(--star-soft);color:var(--star);border-radius:999px;padding:3px 10px;font-size:.75rem;font-weight:600}
 .catbar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-block:6px;margin-inline:-4px;padding-inline:4px;display:flex;flex-direction:column;gap:8px}
 .mains{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
-.main{border:0;background:none;color:var(--muted);border-radius:10px;padding:9px 2px;font:700 .72rem var(--display);letter-spacing:.04em;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.main{position:relative;border:0;background:none;color:var(--muted);border-radius:10px;padding:11px 1px;font:700 clamp(.7rem,3.1vw,.82rem)/1.1 var(--body);letter-spacing:0;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:0}
 .main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-.main .n{font:600 .68rem var(--body);color:var(--accent);font-variant-numeric:tabular-nums;min-height:1em}
-.main[aria-selected="true"]{background:var(--accent);color:#fff}
-.main[aria-selected="true"] .n{color:#fff}
+.main .n{position:absolute;top:3px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent);font-size:0;overflow:hidden}
+.main .n:empty{display:none}
+.main[aria-selected="true"]{background:var(--btn-fill);color:#fff;box-shadow:var(--btn-glass),inset 0 0 0 1.5px var(--btn-rim)}
+.main[aria-selected="true"] .n{background:#fff}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:9px 14px;font:600 .86rem var(--body);cursor:pointer;display:flex;gap:7px}
 .tab .n{color:var(--accent);font-variant-numeric:tabular-nums}
-.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
-.tab[aria-selected="true"] .n{color:var(--bg)}
+.tab[aria-selected="true"]{background:var(--btn-fill);border-color:var(--btn-rim);color:#fff;box-shadow:var(--btn-glass)}
+.tab[aria-selected="true"] .n{color:#fff}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .prod{position:relative;border:1px solid var(--line);background:var(--card);border-radius:16px;min-height:98px;padding:13px;
   color:var(--fg);cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:8px;user-select:none;-webkit-user-select:none;transition:transform .08s}
 .prod:active{transform:scale(.97)}
-.prod.has{border-color:var(--accent);background:var(--accent-soft)}
+.prod.has{border-color:var(--mint);background:var(--mint-soft)}
+.prod.has .cnt{color:var(--mint-ink)}
 .prod.off{opacity:.5}
 .prod .name{font-weight:600;line-height:1.25;padding-right:36px}
 .prod .cnt{font-family:var(--display);font-size:1.9rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
@@ -91,9 +108,32 @@ label.chk input{width:22px;height:22px;accent-color:var(--star)}
 .li small{color:var(--muted)}
 .pick{cursor:pointer}
 .pick .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;color:var(--bg);font-size:.9rem}
-.pick.done .box{background:var(--ok);border-color:var(--ok)}
+.pick.done .box{background:var(--mint-ink);border-color:var(--mint-ink)}
 .pick.done .t, .pick.done b{text-decoration:line-through;color:var(--muted)}
 .pick .t{flex:1;min-width:0}
+.card.warn{background:var(--star-soft);border-color:transparent;font-size:.88rem}
+.card.warn small{color:var(--muted)}
+#visits:empty{display:none}
+.fis .fn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fis .fn b{font:600 .95rem var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fis .fn small{font-size:.8rem}
+.fis .btn{flex:none}
+.oneri{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;padding:7px 0 6px;font-size:.74rem;line-height:1.4;color:var(--muted);border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.oneri b{color:var(--fg)}
+.oneri em{font-style:normal;font-weight:700;color:var(--mint-ink);white-space:nowrap}
+.osel{border:0;background:none;padding:0;font:700 .76rem var(--body);color:var(--mint-ink);text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
+.legend{display:flex;gap:10px;align-items:flex-start;background:var(--star-soft);color:var(--fg);border-radius:12px;padding:10px 12px;font-size:.82rem;line-height:1.4}
+.legend .star{color:var(--star);font-size:1rem;line-height:1.2}
+.dlist{padding:6px 14px}
+.dhead{display:flex;justify-content:space-between;padding:6px 0 6px;border-bottom:1px solid var(--line);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.dhead span:last-child{color:var(--fg);width:40px;text-align:center}
+.dlist h3{margin:10px 0 2px}
+.dlist h3:first-child{margin-top:4px}
+.dlist .li{padding:7px 0;gap:10px}
+.dlist .li b{font-size:1rem;width:40px;flex:none;text-align:center}
+.dlist .box{width:20px;height:20px;border-radius:6px;font-size:.75rem}
+.chip{flex:none;display:inline-flex;align-items:center;gap:2px;background:var(--star-soft);color:var(--star);border-radius:999px;padding:1px 8px;font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums}
+.pick.done .chip{opacity:.5}
 .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
 .seg button{flex:1;border:0;background:none;color:var(--muted);font:600 .85rem var(--body);padding:9px;border-radius:9px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
@@ -126,34 +166,27 @@ details.day summary b{font-family:var(--display);font-size:1.3rem;color:var(--ac
 details.day[open] summary{border-bottom:1px solid var(--line)}
 details.day .body{padding:6px 0 14px;display:flex;flex-direction:column;gap:6px}
 .hero{position:relative;overflow:hidden;color:#fff;
-  background:radial-gradient(120% 140% at 85% -20%,rgba(255,255,255,.18),transparent 55%),linear-gradient(160deg,var(--hero),var(--hero-2));
+  background:var(--hero-bg);
   margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 18px);padding-bottom:26px}
+.hero{box-shadow:inset 0 -1.5px 0 var(--btn-rim),inset 0 1px 0 rgba(255,255,255,.3),inset 0 0 28px rgba(255,150,155,.25)}
+.eyebrow{font:700 .66rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);margin-bottom:2px}
 .hero-in{position:relative;z-index:1;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .hero h1{color:#fff}
 .hero .date,.hero .big span{color:rgba(255,255,255,.82)}
 .hero .big b{color:#fff}
 .hero .wl{color:#fff}
-.hero-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.pill,.snowbtn{border:1px solid rgba(255,255,255,.38);background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:5px 12px;font:600 .76rem var(--body);letter-spacing:.02em}
+.hero-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
+.pill,.snowbtn{border:1px solid rgba(255,255,255,.30);background:rgba(40,0,2,.28);color:#fff;border-radius:999px;padding:5px 10px;font:600 .72rem var(--body);letter-spacing:0;white-space:nowrap}
+.hero-foot{flex-wrap:nowrap}.hero-foot .row2{flex-wrap:nowrap;gap:6px}
 .snowbtn{cursor:pointer}
-.snow{position:absolute;inset:0;pointer-events:none}
-.snow i{position:absolute;top:-10px;border-radius:50%;background:#fff;opacity:.8;animation:fall linear infinite;will-change:transform}
-@keyframes fall{to{transform:translate3d(var(--dx),240px,0)}}
-.lights{position:absolute;left:0;right:0;bottom:6px;height:10px;pointer-events:none;
-  background-image:radial-gradient(circle,#ffd54a 0 3px,transparent 4px),radial-gradient(circle,#ffffff 0 3px,transparent 4px),radial-gradient(circle,#7fdc9b 0 3px,transparent 4px);
-  background-size:60px 10px;background-position:0 0,20px 0,40px 0;animation:twinkle 2.4s ease-in-out infinite alternate}
-.lights::before{content:"";position:absolute;left:0;right:0;top:4px;border-top:1px solid rgba(255,255,255,.3)}
-@keyframes twinkle{from{opacity:.55}to{opacity:1}}
-body.nosnow .snow{display:none}
-body.nosnow .lights{animation:none}
-@media (prefers-reduced-motion:reduce){.snow{display:none}.lights{animation:none}}
 ol.steps,ul.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;line-height:1.45}
 nav.bottom .badge:empty{display:none}
 .hero-in{position:relative}
 .deco{position:absolute;left:50%;top:0;transform:translateX(-50%);height:58px;pointer-events:none;z-index:0}
-.deco svg{height:100%;width:auto;display:block}
-body.nosnow .deco{display:none}
+.deco{top:-2px;height:auto}
+.logo{display:block;width:60px;height:60px;border-radius:16px;box-shadow:0 0 0 1px rgba(255,255,255,.25),0 8px 22px rgba(0,0,0,.35),0 0 34px rgba(255,214,190,.35)}
+
 .toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.85rem;z-index:30;max-width:90vw}
 button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.prod{transition:none}}
@@ -163,44 +196,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
 
 
 <div class="hero">
-  <div class="snow" id="snow" aria-hidden="true"></div>
   <div class="hero-in">
-    <div class="deco" aria-hidden="true"><svg viewBox="0 0 130 66" role="img" aria-label="Noel Baba ve geyik">
-<g stroke="#fff" stroke-opacity=".5" stroke-width="1">
-<!-- geyik -->
-<path d="M16 16 l-4 -9 M16 16 l-1 -10 M14 9 l-5 -1 M20 16 l4 -9 M20 16 l1 -10 M22 9 l5 -1" stroke="#f3d9b1" stroke-opacity="1" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-<ellipse cx="34" cy="38" rx="15" ry="8.5" fill="#8a5a35"/>
-<path d="M22 34 L19 22" stroke="#8a5a35" stroke-opacity="1" stroke-width="7" stroke-linecap="round"/>
-<ellipse cx="17" cy="21" rx="6.5" ry="5.5" fill="#8a5a35"/>
-<circle cx="11.5" cy="22.5" r="2.6" fill="#ff3b3b" stroke="#fff" stroke-opacity=".8"/>
-<circle cx="17" cy="19.5" r="1" fill="#1b1b1b" stroke="none"/>
-<path d="M24 44 l-5 12 M30 46 l-2 12 M40 46 l3 12 M46 43 l6 11" stroke="#6b4426" stroke-opacity="1" stroke-width="3" stroke-linecap="round"/>
-<!-- koşum -->
-<path d="M47 36 Q60 30 72 38" fill="none" stroke="#ffd54a" stroke-opacity="1" stroke-width="1.6"/>
-<!-- kızak -->
-<path d="M68 36 H120 Q122 50 108 52 H76 Q68 50 68 36 Z" fill="#8f0a1c"/>
-<path d="M66 58 H114 Q124 58 124 50" fill="none" stroke="#ffd54a" stroke-opacity="1" stroke-width="2.4" stroke-linecap="round"/>
-<path d="M78 52 v6 M108 52 v6" stroke="#ffd54a" stroke-opacity="1" stroke-width="2"/>
-<!-- Noel Baba -->
-<ellipse cx="96" cy="32" rx="12" ry="11" fill="#e8172d"/>
-<rect x="84" y="33" width="24" height="3.5" fill="#fff" stroke="none"/>
-<circle cx="96" cy="15" r="7" fill="#f2c7a5"/>
-<path d="M89 16 Q96 30 103 16 Q100 21 96 21 Q92 21 89 16 Z" fill="#fff"/>
-<path d="M88.5 12 Q96 -2 104 10 Q108 12 110 8" fill="#e8172d"/>
-<rect x="88" y="10" width="16" height="3.5" rx="1.7" fill="#fff" stroke="none"/>
-<circle cx="110.5" cy="7.5" r="2.6" fill="#fff"/>
-<circle cx="93.5" cy="15" r=".9" fill="#1b1b1b" stroke="none"/><circle cx="98.5" cy="15" r=".9" fill="#1b1b1b" stroke="none"/>
-<!-- hediye çuvalı -->
-<circle cx="114" cy="28" r="7" fill="#7a4a26"/>
-</g>
-</svg></div>
     <header>
-      <div><h1 id="title">Saha</h1><div class="date" id="date"></div><div class="wl" id="wl" hidden>● Ekran açık kalıyor</div></div>
+      <div><div class="eyebrow">İade Sayacı</div><h1 id="title">Saha</h1><div class="date" id="date"></div><div class="wl" id="wl" hidden>● Ekran açık kalıyor</div></div>
       <div class="big"><b id="bigN">0</b><span id="bigL">bu mağaza</span></div>
     </header>
-    <div class="hero-foot"><span class="pill">Mutlu yıllar · 2027</span><span class="row2"><button class="snowbtn" id="helpBtn">Kurulum</button><button class="snowbtn" id="snowBtn">❄ Kar açık</button></span></div>
+    <div class="hero-foot"><span class="row2"><button class="snowbtn" id="helpBtn">Kurulum</button></span></div>
   </div>
-  <div class="lights" aria-hidden="true"></div>
 </div>
 <div class="wrap">
 
@@ -229,11 +231,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
 
   <!-- DEPO -->
   <section id="v-depo" hidden style="display:flex;flex-direction:column;gap:14px">
-    <div class="seg" role="group" aria-label="Liste türü">
-      <button id="modeExact">Birebir mağazalar</button>
-      <button id="modeAll">Tüm iadeler</button>
-    </div>
-    <div id="depoList" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div id="depoOpen"></div>
+    <div class="legend" id="depoLegend"><span class="star">★</span><span><b>Birebir:</b> bu kadarını aynı üründen almalısın. Kalanı başka ürünle değiştirebilirsin.</span></div>
+    <div id="depoList"></div>
+    <div id="depoFis"></div>
     <div class="row2"><button class="btn ghost" id="copyDepo">Listeyi kopyala</button><button class="link" id="clearPick">İşaretleri temizle</button></div>
   </section>
 
@@ -241,11 +242,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
   <section id="v-dagit" hidden style="display:flex;flex-direction:column;gap:12px">
     <div id="dagitList" style="display:flex;flex-direction:column;gap:12px"></div>
     <div class="row2"><button class="btn ghost" id="copyDagit">Listeyi kopyala</button></div>
-    <div class="card">
-      <h2>Yeni gün</h2>
-      <div class="note">Bugünün kayıtlarını Geçmiş ekranına kaydeder, sonra sayıları ve teslim işaretlerini sıfırlar. Mağazaların ve ürün listen kalır.</div>
-      <div id="resetArea"><button class="btn ghost" id="resetBtn">Yeni güne başla</button></div>
-    </div>
   </section>
 
   <!-- KURULUM -->
@@ -301,7 +297,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
 </div></nav>
 <div class="finish" id="finishBar" hidden><div class="in">
   <span class="who" id="finishWho"></span>
-  <button class="btn" id="finishBtn">Ziyareti bitir</button>
+  <button class="btn go" id="finishBtn">Ziyareti bitir</button>
 </div></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -329,6 +325,8 @@ const CATALOG = [
   { id:"tetra", main:"cappy", name:"Tetra Meyve Suyu", tab:"Tetra", subs:{"200 ml":["Atom","Karışık","Şeftali","Vişne"],"1 L":["Atom","Karışık","Şeftali","Vişne","Elma","Kayısı","Portakal"]} },
   { id:"damla", main:"damla", name:"Damla Su",   tab:"Su",   subs:{"":["0,5 L","1 L","1,5 L"]} },
   { id:"soda",  main:"damla", name:"Damla Soda", tab:"Soda", idBase:"damla", start:3, subs:{"":["Sade","Limon","Elma","Karpuz & Çilek","Mango & Ananas"]} },
+  { id:"owb",    main:"damla", name:"Damla OWB",    tab:"OWB",    subs:{"":["330 OWB","750 OWB"]} },
+  { id:"minera", main:"damla", name:"Damla Minera", tab:"Minera", subs:{"":["330 OWB","750 OWB"]} },
   { id:"enerji", main:"enerji", name:"Enerji", subs:{"":["Burn","Powerade"]} }
 ];
 function freshCats(){
@@ -366,6 +364,7 @@ function buzz(){ try { navigator.vibrate && navigator.vibrate(15) } catch(e){} }
 function totals(onlyExact, skipDone){
   const out = {};
   S.stores.forEach(s => {
+    if (!S.closed[s.id]) return;
     if (onlyExact && !s.exact) return;
     if (skipDone && S.done[s.id]) return;
     for (const [iid,n] of Object.entries(S.counts[s.id]||{})) if (n) out[iid]=(out[iid]||0)+n;
@@ -373,7 +372,7 @@ function totals(onlyExact, skipDone){
   return out;
 }
 const sum = o => Object.values(o).reduce((a,b)=>a+b,0);
-const pendingStores = () => S.stores.filter(s => s.exact && storeTotal(s.id) > 0 && !S.done[s.id]);
+const pendingStores = () => S.stores.filter(s => S.closed[s.id] && storeTotal(s.id) > 0);
 
 /* ---------- RENDER ---------- */
 function render(){
@@ -383,7 +382,7 @@ function render(){
   const fs = store(S.cur), showBar = S.view==="saha" && fs && !S.closed[fs.id] && storeTotal(fs.id) > 0;
   $("finishBar").hidden = !showBar;
   if (showBar) $("finishWho").innerHTML = `${fs.exact?"★ ":""}${esc(fs.name)}<small>${storeTotal(fs.id)} adet girildi</small>`;
-  const depoN = sum(totals(true,true)); $("bDepo").textContent = depoN || "";
+  const depoN = sum(totals(false,false)); $("bDepo").textContent = depoN || "";
   const pend = pendingStores().length; $("bDagit").textContent = pend || "";
   if (S.view==="saha") renderSaha();
   if (S.view==="depo") renderDepo();
@@ -397,29 +396,26 @@ function render(){
 function renderSaha(){
   $("title").textContent = "Saha";
   const sel = $("storeSel");
-  sel.innerHTML = S.stores.length
-    ? (S.cur?"":`<option value="" selected>Mağaza seç…</option>`) + S.stores.map(s => `<option value="${s.id}" ${s.id===S.cur?"selected":""}>${S.closed[s.id]?"✓ ":""}${s.exact?"★ ":""}${esc(s.name)}${storeTotal(s.id)?" ("+storeTotal(s.id)+")":""}</option>`).join("")
-    : `<option value="">Henüz mağaza yok</option>`;
-  sel.disabled = !S.stores.length;
-  const s = store(S.cur), locked = s && S.closed[s.id];
+  if (S.cur && S.closed[S.cur]) S.cur = null;
+  const avail = S.stores.filter(s => !S.closed[s.id]);
+  sel.innerHTML = avail.length
+    ? (S.cur?"":`<option value="" selected>Mağaza seç…</option>`) + avail.map(s => `<option value="${s.id}" ${s.id===S.cur?"selected":""}>${s.exact?"★ ":""}${esc(s.name)}${storeTotal(s.id)?" ("+storeTotal(s.id)+")":""}</option>`).join("")
+    : `<option value="">${S.stores.length ? "Tüm mağazalar Depo'da" : "Henüz mağaza yok"}</option>`;
+  sel.disabled = !avail.length;
+  const s = store(S.cur), locked = false;
   $("bigN").textContent = s ? storeTotal(s.id) : 0;
   $("bigL").textContent = "bu mağaza";
-  $("storeInfo").innerHTML = locked
-    ? `<span class="closed-note">✓ Ziyaret kapandı · ${storeTotal(s.id)} adet</span><button class="btn ghost small" id="reopen">Düzenle</button>`
-    : s
+  $("storeInfo").innerHTML = s
     ? `<label class="chk"><input type="checkbox" id="exactT" ${s.exact?"checked":""}> Birebir değişim</label>
        <span id="delArea"><button class="link" id="delStore">Mağazayı sil</button></span>`
-    : `<span class="empty">${S.stores.length ? "Listeden mağaza seç ya da" : "Başlamak için"} <b>+ Mağaza</b> ile yeni mağaza ekle.</span>`;
+    : `<span class="empty">${avail.length ? "Listeden mağaza seç ya da <b>+ Mağaza</b> ile yeni mağaza ekle." : S.stores.length ? "Mağazaların Depo'da. Yeni ziyaret için <b>+ Mağaza</b> ile mağaza ekle." : "Başlamak için <b>+ Mağaza</b> ile yeni mağaza ekle."}</span>`;
 
-  const fin = S.stores.filter(x => S.closed[x.id]);
-  $("visits").innerHTML = fin.length ? `<div class="card"><h2>Bugün biten ziyaretler</h2><div class="list">${
-    fin.map(x => `<div class="li"><span>✓ ${x.exact?"★ ":""}${esc(x.name)}</span><b>${storeTotal(x.id)}</b></div>`).join("")
-  }</div></div>` : "";
+  $("visits").innerHTML = "";
 
   const c = cat();
   const gn = g => s ? g.items.reduce((a,i)=>a+cnt(s.id,i.id),0) : 0;
   $("mains").innerHTML = MAINS.map(m => { const n = S.cats.filter(g=>g.main===m.id).reduce((a,g)=>a+gn(g),0);
-    return `<button class="main" role="tab" data-main="${m.id}" aria-selected="${m.id===c.main}"><span>${m.name}</span><span class="n">${n||""}</span></button>`; }).join("");
+    return `<button class="main" role="tab" data-main="${m.id}" aria-selected="${m.id===c.main}" aria-label="${m.name}${n?`, ${n} adet`:""}"><span>${m.name}</span><span class="n" aria-hidden="true">${n||""}</span></button>`; }).join("");
   $("tabs").innerHTML = S.cats.filter(g=>g.main===c.main).map(g => { const n = gn(g);
     return `<button class="tab" role="tab" data-cat="${g.id}" aria-selected="${g.id===c.id}">${esc(g.tab)}${n?`<span class="n">${n}</span>`:""}</button>`; }).join("");
 
@@ -435,43 +431,79 @@ function renderSaha(){
 
 }
 
+/* Öneri kalıbı (bütün gruplar): ★ birebir adetler aynen alınır; kalan esnek adetler, aynı boy içinde seçtiğin üründen alınır */
+const kisa = n => n.replace("Coca-Cola ","");
+function segs(c){ return [...new Set(c.items.map(i=>i.sub))] }
+function oneriHesap(c,sub,t,st){
+  const items=c.items.filter(i=>i.sub===sub);
+  let esnek=0; items.forEach(i=>{ esnek += (t[i.id]||0)-(st[i.id]||0) });
+  if (esnek<=0) return null;
+  const key=c.id+"|"+sub; S.oneriSec ||= {};
+  const hedef = items.find(i=>i.id===S.oneriSec[key]) || items.find(i=>i.name==="Coca-Cola Orijinal")
+             || items.slice().sort((a,b)=>(t[b.id]||0)-(t[a.id]||0))[0];
+  return { key, items, hedef, esnek, top:(st[hedef.id]||0)+esnek };
+}
+function oneri(c,t,st){
+  return segs(c).map(sub => { const o=oneriHesap(c,sub,t,st); if(!o) return "";
+    return `<div class="oneri"><span>${sub?`<b class="sz">${esc(sub)}</b> · `:""}★ Birebir harici kalan Top: <b>${o.esnek}</b></span><em>Seçeceğin ürünü alabilirsin!</em></div>`; }).join("");
+}
 function renderDepo(){
   $("title").textContent = "Depo";
-  const onlyExact = S.mode === "exact";
-  $("modeExact").setAttribute("aria-pressed", onlyExact); $("modeAll").setAttribute("aria-pressed", !onlyExact);
-  const t = totals(onlyExact, onlyExact);
-  $("bigN").textContent = sum(t); $("bigL").textContent = onlyExact ? "alınacak adet" : "toplam iade";
+  const t = totals(false,false), st = totals(true,false), starN = sum(st);
+  $("bigN").textContent = sum(t); $("bigL").textContent = "toplam iade";
+  $("depoLegend").hidden = !starN;
+  const nm = i => esc([i.sub,i.name].filter(Boolean).join(" · "));
   const blocks = S.cats.map(c => {
     const rows = c.items.filter(i => t[i.id]);
     if (!rows.length) return "";
-    return `<div class="card"><h2>${esc(c.name)}</h2><div class="list">${rows.map(i => {
-      const on = onlyExact && S.picked[i.id];
-      return onlyExact
-        ? `<div class="li pick ${on?"done":""}" role="checkbox" tabindex="0" aria-checked="${!!on}" data-pick="${i.id}">
-             <span class="box">${on?"✓":""}</span><span class="t">${esc([i.sub,i.name].filter(Boolean).join(" · "))}</span><b>${t[i.id]}</b></div>`
-        : `<div class="li"><span>${esc([i.sub,i.name].filter(Boolean).join(" · "))}</span><b>${t[i.id]}</b></div>`;
-    }).join("")}</div></div>`;
+    return `<h3>${esc(c.name)}</h3>` + rows.map(i => { const on = S.picked[i.id];
+      return `<div class="li pick ${on?"done":""}" role="checkbox" tabindex="0" aria-checked="${!!on}" data-pick="${i.id}" aria-label="${nm(i)}, ${t[i.id]} adet${st[i.id]?`, ${st[i.id]} birebir`:""}">
+        <span class="box">${on?"✓":""}</span><span class="t">${nm(i)}</span>${st[i.id]?`<span class="chip">★${st[i.id]}</span>`:""}<b>${t[i.id]}</b></div>`; }).join("") + oneri(c,t,st);
   }).join("");
-  $("depoList").innerHTML = blocks || `<div class="card empty">${onlyExact
-    ? "Depodan alınacak ürün yok. Birebir değişim (★) işaretli mağazalarda iade girdiğinde ürünler burada toplanır."
-    : "Bugün henüz iade girilmedi."}</div>`;
-  $("clearPick").hidden = !onlyExact || !Object.keys(S.picked).length;
+  $("depoList").innerHTML = blocks ? `<div class="card dlist"><div class="dhead"><span>Ürün</span><span>Top.</span></div><div class="list">${blocks}</div></div>`
+    : `<div class="card empty">Depo'da ürün yok. Saha'da <b>Ziyareti bitir</b> dediğin mağazaların iadeleri burada ürün ürün toplanır.</div>`;
+  $("clearPick").hidden = !Object.keys(S.picked).length;
+  const open = S.stores.filter(s => !S.closed[s.id] && storeTotal(s.id) > 0);
+  $("depoOpen").innerHTML = open.map(s => `<div class="card warn"><div class="row2" style="justify-content:space-between">
+      <span><b>${s.exact?"★ ":""}${esc(s.name)}</b> ziyareti açık · ${storeTotal(s.id)} adet<br><small>Ziyaret bitmeden Depo'ya geçmez.</small></span>
+      <button class="btn small go" data-finish="${s.id}">Ziyareti bitir</button></div></div>`).join("");
+  const fis = S.stores.filter(s => S.closed[s.id] && storeTotal(s.id) > 0);
+  $("depoFis").innerHTML = fis.length ? `<div class="card"><h2>İade fişleri</h2><div class="note">Eksik ya da yanlış girdiysen fişi Saha'ya geri alıp düzeltebilirsin.</div><div class="list">${
+    fis.map(s => `<div class="li fis"><span class="fn"><b>${s.exact?"★ ":""}${esc(s.name)}</b><small>${storeTotal(s.id)} adet</small></span><button class="btn ghost small" data-reopen="${s.id}">Düzenlemeye geri dön</button></div>`).join("")
+  }</div></div>` : "";
 }
 
 function storeLines(s){
   const out=[]; S.cats.forEach(c => c.items.forEach(i => { const n=cnt(s.id,i.id); if(n) out.push([label(c,i),n]) })); return out;
 }
+let dagitAsk=null;
 function renderDagit(){
   $("title").textContent = "Dağıtım";
-  const pend = pendingStores();
-  const done = S.stores.filter(s => s.exact && S.done[s.id]);
+  const pend = pendingStores().sort((a,b)=>(b.exact?1:0)-(a.exact?1:0));
   $("bigN").textContent = pend.length; $("bigL").textContent = "mağaza kaldı";
-  let h = pend.map(s => `<div class="card"><div class="store-head"><h2>${esc(s.name)}</h2><span class="tag">★ ${storeTotal(s.id)} adet</span></div>
+  $("dagitList").innerHTML = pend.length ? pend.map(s => `<div class="card"><div class="store-head"><h2>${s.exact?"★ ":""}${esc(s.name)}</h2><span class="tag">${storeTotal(s.id)} adet</span></div>
+      <div class="note">${s.exact ? "Birebir: aynı ürünleri götür." : "Yerine başka ürün verebilirsin."}</div>
       <div class="list">${storeLines(s).map(l=>`<div class="li"><span>${esc(l[0])}</span><b>${l[1]}</b></div>`).join("")}</div>
-      <button class="btn" data-done="${s.id}">Bıraktım</button></div>`).join("");
-  if (!pend.length) h = `<div class="card empty">${done.length ? "Bütün teslimatlar tamam." : "Birebir değişim (★) isteyen mağazalarda iade girdiğinde, her mağazaya ne götüreceğin burada listelenir."}</div>`;
-  if (done.length) h += `<h3>Teslim edildi</h3>` + done.map(s => `<div class="card done-card"><div class="store-head"><h2>✓ ${esc(s.name)}</h2><button class="btn ghost small" data-undo="${s.id}">Geri al</button></div></div>`).join("");
-  $("dagitList").innerHTML = h;
+      ${dagitAsk===s.id
+        ? `<div class="row2">Teslim edildi mi? Mağaza Geçmiş'e taşınacak. <button class="btn small" data-yes="${s.id}">Evet, bıraktım</button><button class="btn ghost small" data-no>Vazgeç</button></div>`
+        : `<button class="btn go" data-done="${s.id}">Bıraktım</button>`}</div>`).join("")
+    : `<div class="card empty">Teslim edilecek mağaza yok. Ziyaretini bitirdiğin mağazalar burada listelenir. <b>Bıraktım</b> dediğinde mağaza Geçmiş'e taşınır.</div>`;
+}
+
+/* Teslim edilen mağazayı, iadenin alındığı günün Geçmiş kaydına ekler ve sayılarını sıfırlar */
+function archiveStore(s){
+  const at = (S.storeAt && S.storeAt[s.id]) || new Date().toISOString();
+  const key = new Date(at).toDateString();
+  const rec = { name:s.name, exact:!!s.exact, total:storeTotal(s.id), lines:storeLines(s) };
+  if (rec.total){
+    let day = S.history.find(d => new Date(d.at).toDateString()===key);
+    if (!day){ day = { at, total:0, stores:[] }; S.history.push(day); }
+    day.stores.push(rec); day.total += rec.total;
+    S.history.sort((a,b)=>b.at.localeCompare(a.at)); S.history = S.history.slice(0,120);
+  }
+  delete S.counts[s.id]; delete S.closed[s.id]; delete S.done[s.id]; if (S.storeAt) delete S.storeAt[s.id];
+  if (S.cur===s.id) S.cur=null;
+  const left = totals(false,false); for (const id in S.picked) if (!left[id]) delete S.picked[id];
 }
 
 /* ---------- EVENTS ---------- */
@@ -501,7 +533,6 @@ $("storeInfo").addEventListener("click", e => {
     const id=S.cur; S.stores=S.stores.filter(s=>s.id!==id); delete S.counts[id]; delete S.done[id]; delete S.closed[id];
     S.cur = S.stores[0]?.id || null; save(); render(); toast("Mağaza silindi");
   } else if (e.target.id==="delNo"){ render(); }
-  else if (e.target.id==="reopen"){ delete S.closed[S.cur]; save(); render(); toast("Ziyaret düzenlemeye açıldı"); }
 });
 
 S.lastCat ||= {};
@@ -522,7 +553,7 @@ $("grid").addEventListener("click", e => {
   if (e.target.closest("[data-edit]")){ S.editing=p.dataset.p; render(); const q=$("qtyIn"); if(q){ q.focus(); q.select() } return; }
   const c = S.counts[S.cur] ||= {}; c[p.dataset.p]=(c[p.dataset.p]||0)+1; markStart(); S.done[S.cur]=false; buzz(); save(); render();
 });
-function markStart(){ if (!S.firstAt) S.firstAt = new Date().toISOString() }
+function markStart(){ if (S.cur){ S.storeAt ||= {}; S.storeAt[S.cur] ||= new Date().toISOString() } }
 function commitQty(){
   const q=$("qtyIn"), id=S.editing; if (!id) return;
   S.editing=null;
@@ -542,49 +573,41 @@ $("grid").addEventListener("keydown", e => { if((e.key==="Enter"||e.key===" ")&&
 $("finishBtn").onclick = () => {
   const s = store(S.cur); if (!s) return;
   S.closed[s.id] = true; S.cur = null; save(); render(); window.scrollTo(0,0);
-  toast(`${s.name} kapandı · ${storeTotal(s.id)} adet`);
+  toast(`${s.name} Depo'ya taşındı · ${storeTotal(s.id)} adet`);
 };
 
-$("modeExact").onclick = () => { S.mode="exact"; save(); render() };
-$("modeAll").onclick = () => { S.mode="all"; save(); render() };
+document.getElementById("v-depo").addEventListener("click", e => {
+  const r = e.target.closest("[data-reopen]"), f = e.target.closest("[data-finish]");
+  if (r){ const st=store(r.dataset.reopen); if(!st) return; delete S.closed[st.id]; S.cur=st.id; S.view="saha"; save(); render(); window.scrollTo(0,0); toast(st.name+" düzenlemeye açıldı"); }
+  if (f){ const st=store(f.dataset.finish); if(!st) return; S.closed[st.id]=true; if (S.cur===st.id) S.cur=null; save(); render(); toast(st.name+" Depo'ya taşındı"); }
+});
+$("depoList").addEventListener("click", e => { const b=e.target.closest("[data-osec]"); if(!b) return; e.stopPropagation();
+  S.oneriSec ||= {}; S.oneriSec[b.dataset.osec]=b.dataset.item; save(); render(); });
 function togglePick(el){ const id=el.dataset.pick; S.picked[id]=!S.picked[id]; if(!S.picked[id]) delete S.picked[id]; save(); render() }
 $("depoList").addEventListener("click", e => { const r=e.target.closest("[data-pick]"); if(r) togglePick(r) });
 $("depoList").addEventListener("keydown", e => { const r=e.target.closest("[data-pick]"); if(r&&(e.key===" "||e.key==="Enter")){ e.preventDefault(); togglePick(r) } });
 $("clearPick").onclick = () => { S.picked={}; save(); render() };
 
 $("dagitList").addEventListener("click", e => {
-  const d=e.target.closest("[data-done]"), u=e.target.closest("[data-undo]");
-  if (d){ S.done[d.dataset.done]=true; save(); render(); toast("Teslim edildi, listeden düştü") }
-  if (u){ S.done[u.dataset.undo]=false; save(); render() }
+  const d=e.target.closest("[data-done]"), y=e.target.closest("[data-yes]");
+  if (d){ dagitAsk=d.dataset.done; render(); }
+  else if (y){ const st=store(y.dataset.yes); dagitAsk=null; if (st){ archiveStore(st); save(); toast(st.name+" Geçmiş'e taşındı"); } render(); }
+  else if (e.target.closest("[data-no]")){ dagitAsk=null; render(); }
 });
 
 async function copy(text){ try { await navigator.clipboard.writeText(text); toast("Kopyalandı") } catch(e){ toast("Kopyalanamadı") } }
 $("copyDepo").onclick = () => {
-  const onlyExact=S.mode==="exact", t=totals(onlyExact,onlyExact), out=[];
-  S.cats.forEach(c => { const r=c.items.filter(i=>t[i.id]); if(r.length){ out.push(c.name+":"); r.forEach(i=>out.push("  "+[i.sub,i.name].filter(Boolean).join(" ")+": "+t[i.id])) } });
+  const t=totals(false,false), st=totals(true,false), out=[];
+  S.cats.forEach(c => { const r=c.items.filter(i=>t[i.id]); if(r.length){ out.push(c.name+":"); r.forEach(i=>out.push("  "+[i.sub,i.name].filter(Boolean).join(" ")+": "+t[i.id]+(st[i.id]?` (★${st[i.id]} birebir)`:"")));
+    segs(c).forEach(sub=>{ const o=oneriHesap(c,sub,t,st); if(o) out.push("  → "+(sub?sub+": ":"")+"★ Birebir harici kalan Top: "+o.esnek+" · Seçeceğin ürünü alabilirsin!") }) } });
   if(!out.length) return toast("Kopyalanacak ürün yok");
-  copy((onlyExact?"Depodan alınacaklar":"Tüm iadeler")+" – "+today()+"\n"+out.join("\n"));
+  copy("Tüm iadeler – "+today()+"\n"+out.join("\n")+(sum(st)?"\n\n★ = birebir mağaza, aynı üründen alınmalı":""));
 };
 $("copyDagit").onclick = () => {
   const p=pendingStores(); if(!p.length) return toast("Bekleyen teslimat yok");
-  copy("Dağıtım – "+today()+"\n\n"+p.map(s=>s.name+":\n"+storeLines(s).map(l=>"  "+l[0]+": "+l[1]).join("\n")).join("\n\n"));
+  copy("Dağıtım – "+today()+"\n\n"+p.map(s=>(s.exact?"★ ":"")+s.name+(s.exact?" (birebir)":"")+":\n"+storeLines(s).map(l=>"  "+l[0]+": "+l[1]).join("\n")).join("\n\n"));
 };
 
-$("resetArea").addEventListener("click", e => {
-  if (e.target.id==="resetBtn") $("resetArea").innerHTML=`<div class="row2">Emin misin? <button class="btn danger small" id="resetYes">Evet, sıfırla</button><button class="btn ghost small" id="resetNo">Vazgeç</button></div>`;
-  if (e.target.id==="resetNo"||e.target.id==="resetYes"){
-    if (e.target.id==="resetYes"){ const saved=archiveDay(); S.counts={}; S.done={}; S.picked={}; S.closed={}; S.firstAt=null; save(); toast(saved?"Gün geçmişe kaydedildi":"Yeni gün başladı") }
-    $("resetArea").innerHTML=`<button class="btn ghost" id="resetBtn">Yeni güne başla</button>`; render();
-  }
-});
-
-function archiveDay(){
-  const stores = S.stores.filter(s=>storeTotal(s.id)>0).map(s=>({ name:s.name, exact:!!s.exact, total:storeTotal(s.id), lines:storeLines(s) }));
-  if (!stores.length) return false;
-  S.history.unshift({ at:S.firstAt||new Date().toISOString(), total:stores.reduce((a,s)=>a+s.total,0), stores });
-  S.history = S.history.slice(0,120);
-  return true;
-}
 function renderGecmis(){
   $("title").textContent = "Geçmiş";
   $("bigN").textContent = S.history.length; $("bigL").textContent = "kayıtlı gün";
@@ -596,7 +619,7 @@ function renderGecmis(){
       <div class="row2" style="justify-content:flex-end;padding-top:6px">${histAsk===d.at
         ? `<span class="row2">Bu gün silinsin mi? <button class="btn danger small" data-hdel="${d.at}">Sil</button><button class="btn ghost small" data-hno>Vazgeç</button></span>`
         : `<button class="link" data-hask="${d.at}">Bu günü sil</button>`}</div></div></details>`;
-  }).join("") : `<div class="card empty">Henüz kayıtlı gün yok. Gün sonunda Dağıtım ekranındaki <b>Yeni güne başla</b> düğmesine dokunduğunda o günün iadeleri buraya kaydedilir.</div>`;
+  }).join("") : `<div class="card empty">Henüz kayıtlı gün yok. Dağıtım ekranında <b>Bıraktım</b> dediğin mağazalar, iadeyi aldığın günün altında buraya kaydedilir.</div>`;
 }
 let histAsk=null;
 document.getElementById("v-gecmis").addEventListener("click", e => {
@@ -617,18 +640,11 @@ document.addEventListener("visibilitychange", keepAwake);
 document.addEventListener("pointerdown", keepAwake);
 keepAwake();
 
-/* Kar efekti: 18 hafif tane, yalnızca üst bantta; düğmeyle kapatılabilir */
-(function(){ const box=$("snow"); let h="";
-  for (let k=0;k<18;k++){ const z=(3+Math.random()*4).toFixed(1);
-    h+=`<i style="left:${(Math.random()*100).toFixed(1)}%;width:${z}px;height:${z}px;--dx:${(Math.random()*60-30).toFixed(0)}px;animation-duration:${(6+Math.random()*6).toFixed(1)}s;animation-delay:-${(Math.random()*12).toFixed(1)}s"></i>` }
-  box.innerHTML=h; })();
-function applySnow(){ const on = S.snow!==false; document.body.classList.toggle("nosnow",!on);
-  $("snowBtn").textContent = on ? "❄ Kar açık" : "❄ Kar kapalı"; $("snowBtn").setAttribute("aria-pressed", on) }
 let backView="saha";
 $("helpBtn").onclick = () => { if (S.view!=="kurulum") backView=S.view; S.view="kurulum"; render(); window.scrollTo(0,0) };
 $("helpBack").onclick = () => { S.view=backView; save(); render(); window.scrollTo(0,0) };
-$("snowBtn").onclick = () => { S.snow = S.snow===false; save(); applySnow() };
-applySnow();
+for (const st of S.stores.slice()) if (S.done && S.done[st.id] && storeTotal(st.id)>0) archiveStore(st);
+save();
 
 render();
 </script>

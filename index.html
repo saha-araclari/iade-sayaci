@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d0102b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="İade Sayacı">
+<title>İade Sayacı</title>
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: üstte kırmızı yılbaşı bandı (başlık + toplam + kar), altında tek sütun içerik, altta sabit 4 sekmeli gezinme */
+:root{
+  --bg:#f6f3f3; --card:#ffffff; --fg:#231416; --muted:#6e5d5f; --line:#eadfe0;
+  --accent:#d71920; --accent-soft:#fde4e4; --star:#a8700a; --star-soft:#fbf0d6; --danger:#7a1218; --ok:#2f7d3f;
+  --hero:#d0102b; --hero-2:#8f0a1c;
+  --display:"Space Grotesk",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#150c0d; --card:#22161a; --fg:#f5ecec; --muted:#b39c9f; --line:#3a2629;
+  --accent:#ff4a4f; --accent-soft:#3d171a; --star:#f0b84a; --star-soft:#3b2c12; --danger:#ff7a6e; --ok:#6cc47e;
+  --hero:#a80d24; --hero-2:#5e0714; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#150c0d; --card:#22161a; --fg:#f5ecec; --muted:#b39c9f; --line:#3a2629;
+  --accent:#ff4a4f; --accent-soft:#3d171a; --star:#f0b84a; --star-soft:#3b2c12; --danger:#ff7a6e; --ok:#6cc47e;
+  --hero:#a80d24; --hero-2:#5e0714; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding-block:14px calc(170px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-size:1.45rem;margin:0;letter-spacing:-.01em}
+h2{font-family:var(--display);font-size:1.05rem;margin:0}
+h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:4px 0 0;font-weight:600}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.date{color:var(--muted);font-size:.85rem}
+.big{text-align:right}
+.big b{font-family:var(--display);font-size:2rem;display:block;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
+.big span{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input[type=text]{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--fg);
+  border-radius:12px;padding:12px;font:inherit}
+select{font-weight:600}
+.btn{border:0;border-radius:12px;padding:12px 16px;font:600 .9rem var(--body);cursor:pointer;background:var(--accent);color:var(--bg);white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.small{padding:8px 12px;font-size:.82rem}
+.link{background:none;border:0;color:var(--muted);font:500 .85rem var(--body);text-decoration:underline;cursor:pointer;padding:4px}
+label.chk{display:flex;gap:10px;align-items:center;font-weight:500;cursor:pointer}
+label.chk input{width:22px;height:22px;accent-color:var(--star)}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--star-soft);color:var(--star);border-radius:999px;padding:3px 10px;font-size:.75rem;font-weight:600}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;position:sticky;top:env(safe-area-inset-top,0px);
+  background:var(--bg);padding-block:6px;z-index:5;margin-inline:-4px;padding-inline:4px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:9px 14px;font:600 .86rem var(--body);cursor:pointer;display:flex;gap:7px}
+.tab .n{color:var(--accent);font-variant-numeric:tabular-nums}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.tab[aria-selected="true"] .n{color:var(--bg)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prod{position:relative;border:1px solid var(--line);background:var(--card);border-radius:16px;min-height:98px;padding:13px;
+  color:var(--fg);cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:8px;user-select:none;-webkit-user-select:none;transition:transform .08s}
+.prod:active{transform:scale(.97)}
+.prod.has{border-color:var(--accent);background:var(--accent-soft)}
+.prod.off{opacity:.5}
+.prod .name{font-weight:600;line-height:1.25;padding-right:36px}
+.prod .cnt{font-family:var(--display);font-size:1.9rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.prod:not(.has) .cnt{color:var(--muted);opacity:.55}
+.minus{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:1.3rem;cursor:pointer}
+.minus:disabled{opacity:.3}
+.note{font-size:.8rem;color:var(--muted)}
+.empty{color:var(--muted);font-size:.92rem;line-height:1.5}
+.list{display:flex;flex-direction:column;font-variant-numeric:tabular-nums}
+.li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);min-width:0}
+.li:last-child{border-bottom:0}
+.li b{font-family:var(--display);font-size:1.15rem}
+.li small{color:var(--muted)}
+.pick{cursor:pointer}
+.pick .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;color:var(--bg);font-size:.9rem}
+.pick.done .box{background:var(--ok);border-color:var(--ok)}
+.pick.done .t, .pick.done b{text-decoration:line-through;color:var(--muted)}
+.pick .t{flex:1;min-width:0}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{flex:1;border:0;background:none;color:var(--muted);font:600 .85rem var(--body);padding:9px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.store-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.store-head h2{min-width:0;overflow-wrap:anywhere}
+.done-card{opacity:.75}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);z-index:20;
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.bottom .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.bottom button{border:0;background:none;color:var(--muted);font:600 .82rem var(--body);padding:10px 4px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.bottom svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+nav.bottom button[aria-current="true"]{color:var(--accent)}
+nav.bottom .badge{font-variant-numeric:tabular-nums;font-size:.7rem;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:0 7px;margin-left:4px}
+.finish{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:19;background:var(--card);border-top:1px solid var(--line);
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.finish .in{max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.finish .who{min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.finish .who small{display:block;color:var(--muted);font-weight:500}
+.closed-note{display:flex;align-items:center;gap:8px;color:var(--ok);font-weight:600}
+.prod .cnt[data-edit]{align-self:flex-start;border-bottom:2px dotted var(--line);padding-bottom:2px;min-width:2ch}
+.qty{display:flex;gap:6px;align-items:center}
+.qty input{width:5.5ch;flex:none;border:2px solid var(--accent);background:var(--bg);color:var(--fg);border-radius:10px;padding:8px;font:700 1.3rem var(--display);font-variant-numeric:tabular-nums}
+.wl{font-size:.75rem;color:var(--ok);font-weight:600;margin-top:2px}
+details.day{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 14px}
+details.day summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0}
+details.day summary::-webkit-details-marker{display:none}
+details.day summary .d{font-weight:600}
+details.day summary small{display:block;color:var(--muted);font-weight:500;font-size:.82rem}
+details.day summary b{font-family:var(--display);font-size:1.3rem;color:var(--accent);font-variant-numeric:tabular-nums}
+details.day[open] summary{border-bottom:1px solid var(--line)}
+details.day .body{padding:6px 0 14px;display:flex;flex-direction:column;gap:6px}
+.hero{position:relative;overflow:hidden;color:#fff;
+  background:radial-gradient(120% 140% at 85% -20%,rgba(255,255,255,.18),transparent 55%),linear-gradient(160deg,var(--hero),var(--hero-2));
+  margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 18px);padding-bottom:26px}
+.hero-in{position:relative;z-index:1;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero h1{color:#fff}
+.hero .date,.hero .big span{color:rgba(255,255,255,.82)}
+.hero .big b{color:#fff}
+.hero .wl{color:#fff}
+.hero-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pill,.snowbtn{border:1px solid rgba(255,255,255,.38);background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:5px 12px;font:600 .76rem var(--body);letter-spacing:.02em}
+.snowbtn{cursor:pointer}
+.snow{position:absolute;inset:0;pointer-events:none}
+.snow i{position:absolute;top:-10px;border-radius:50%;background:#fff;opacity:.8;animation:fall linear infinite;will-change:transform}
+@keyframes fall{to{transform:translate3d(var(--dx),240px,0)}}
+.lights{position:absolute;left:0;right:0;bottom:6px;height:10px;pointer-events:none;
+  background-image:radial-gradient(circle,#ffd54a 0 3px,transparent 4px),radial-gradient(circle,#ffffff 0 3px,transparent 4px),radial-gradient(circle,#7fdc9b 0 3px,transparent 4px);
+  background-size:60px 10px;background-position:0 0,20px 0,40px 0;animation:twinkle 2.4s ease-in-out infinite alternate}
+.lights::before{content:"";position:absolute;left:0;right:0;top:4px;border-top:1px solid rgba(255,255,255,.3)}
+@keyframes twinkle{from{opacity:.55}to{opacity:1}}
+body.nosnow .snow{display:none}
+body.nosnow .lights{animation:none}
+@media (prefers-reduced-motion:reduce){.snow{display:none}.lights{animation:none}}
+ol.steps,ul.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;line-height:1.45}
+.toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.85rem;z-index:30;max-width:90vw}
+button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.prod{transition:none}}
+</style>
+</head>
+<body>
+
+
+<div class="hero">
+  <div class="snow" id="snow" aria-hidden="true"></div>
+  <div class="hero-in">
+    <header>
+      <div><h1 id="title">Saha</h1><div class="date" id="date"></div><div class="wl" id="wl" hidden>● Ekran açık kalıyor</div></div>
+      <div class="big"><b id="bigN">0</b><span id="bigL">bu mağaza</span></div>
+    </header>
+    <div class="hero-foot"><span class="pill">Mutlu yıllar · 2027</span><span class="row2"><button class="snowbtn" id="helpBtn">Kurulum</button><button class="snowbtn" id="snowBtn">❄ Kar açık</button></span></div>
+  </div>
+  <div class="lights" aria-hidden="true"></div>
+</div>
+<div class="wrap">
+
+  <!-- SAHA -->
+  <section id="v-saha" style="display:flex;flex-direction:column;gap:14px">
+    <div class="card">
+      <div class="row2">
+        <select id="storeSel" aria-label="Mağaza seç"></select>
+        <button class="btn" id="addStoreBtn">+ Mağaza</button>
+      </div>
+      <div id="storeForm" class="row2" hidden style="flex-direction:column;align-items:stretch">
+        <input type="text" id="storeName" placeholder="Mağaza adı (ör. Migros Atatürk Cd.)" maxlength="50">
+        <label class="chk"><input type="checkbox" id="storeExact"> Birebir değişim istiyor (aynı ürünü geri götüreceğim)</label>
+        <div class="row2"><button class="btn" id="saveStore">Kaydet</button><button class="btn ghost" id="cancelStore">Vazgeç</button></div>
+      </div>
+      <div id="storeInfo" class="row2" style="justify-content:space-between"></div>
+    </div>
+    <div id="visits"></div>
+
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <div id="grid" style="display:flex;flex-direction:column;gap:10px"></div>
+
+    <div class="note">Ürüne dokun: +1 · Sağ üstteki − ile azalt</div>
+    <div class="note" style="text-align:center;padding-top:6px;border-top:1px dashed var(--line)">Şirket sistemine bağlanmaz · Bilgiler yalnızca bu telefonda · Ücretsiz, hesap gerekmez</div>
+  </section>
+
+  <!-- DEPO -->
+  <section id="v-depo" hidden style="display:flex;flex-direction:column;gap:14px">
+    <div class="seg" role="group" aria-label="Liste türü">
+      <button id="modeExact">Birebir mağazalar</button>
+      <button id="modeAll">Tüm iadeler</button>
+    </div>
+    <div id="depoList" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="row2"><button class="btn ghost" id="copyDepo">Listeyi kopyala</button><button class="link" id="clearPick">İşaretleri temizle</button></div>
+  </section>
+
+  <!-- DAĞITIM -->
+  <section id="v-dagit" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div id="dagitList" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="row2"><button class="btn ghost" id="copyDagit">Listeyi kopyala</button></div>
+    <div class="card">
+      <h2>Yeni gün</h2>
+      <div class="note">Bugünün kayıtlarını Geçmiş ekranına kaydeder, sonra sayıları ve teslim işaretlerini sıfırlar. Mağazaların ve ürün listen kalır.</div>
+      <div id="resetArea"><button class="btn ghost" id="resetBtn">Yeni güne başla</button></div>
+    </div>
+  </section>
+
+  <!-- KURULUM -->
+  <section id="v-kurulum" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div class="card">
+      <h2>Telefonunun ana ekranına ekle</h2>
+      <div class="note">Ekledikten sonra İade Sayacı ana ekranda bir uygulama gibi durur. Her zaman o simgeden aç, çünkü sayıların o simgenin içinde saklanır.</div>
+    </div>
+    <div id="guides" style="display:flex;flex-direction:column;gap:12px">
+      <div class="card" data-os="ios">
+        <h2>iPhone · Chrome</h2>
+        <ol class="steps">
+          <li>Bu linki <b>Chrome</b> ile aç.</li>
+          <li>Adres çubuğunun sağındaki <b>Paylaş</b> simgesine dokun (kare ve yukarı ok).</li>
+          <li>Açılan listede <b>Ana Ekrana Ekle</b>'yi seç. Görmüyorsan listeyi aşağı kaydır ya da <b>Daha fazla</b>'ya dokun.</li>
+          <li>İsmi "İade Sayacı" bırak ve <b>Ekle</b>'ye dokun.</li>
+        </ol>
+        <div class="note">iOS 16.4 ve sonrası gerekir. Seçenek çıkmazsa aynı adımları Safari'de yapabilirsin.</div>
+      </div>
+      <div class="card" data-os="android">
+        <h2>Android · Chrome</h2>
+        <ol class="steps">
+          <li>Bu linki <b>Chrome</b> ile aç.</li>
+          <li>Sağ üstteki <b>⋮</b> menüsüne dokun.</li>
+          <li><b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>'yi seç.</li>
+          <li>Çıkan pencerede <b>Ekle</b>'ye dokun.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Bu uygulama hakkında</h2>
+      <ul class="steps">
+        <li><b>Hiçbir şirket sistemine bağlanmaz.</b> Sadece telefonundaki sayaç olarak çalışır.</li>
+        <li><b>Bilgilerin yalnızca senin telefonunda kalır.</b> Girdiğin mağazalar ve sayılar kimseye gönderilmez, başka kimse göremez.</li>
+        <li><b>Ücretsizdir.</b> Kurulum, hesap ya da üyelik gerekmez.</li>
+        <li>Tarayıcı verilerini temizlersen kayıtların da silinir.</li>
+      </ul>
+    </div>
+    <button class="btn" id="helpBack">Uygulamaya dön</button>
+  </section>
+
+  <!-- GEÇMİŞ -->
+  <section id="v-gecmis" hidden style="display:flex;flex-direction:column;gap:10px">
+    <div id="histList" style="display:flex;flex-direction:column;gap:10px"></div>
+  </section>
+</div>
+
+<nav class="bottom" aria-label="Ekranlar"><div class="in">
+  <button data-view="saha"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 20v-6h6v6"/></svg><span>Saha</span></button>
+  <button data-view="depo"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><span>Depo<span class="badge" id="bDepo"></span></span></button>
+  <button data-view="dagit"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Dağıtım<span class="badge" id="bDagit"></span></span></button>
+  <button data-view="gecmis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Geçmiş</span></button>
+</div></nav>
+<div class="finish" id="finishBar" hidden><div class="in">
+  <span class="who" id="finishWho"></span>
+  <button class="btn" id="finishBtn">Ziyareti bitir</button>
+</div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const KEY = "iade-sayaci-v2";
+const GAZLI = ["Coca-Cola Orijinal","Coca-Cola Zero","Fanta","Sprite"];
+const CATALOG = [
+  { id:"g250", name:"250 ml Cam",  subs:{"":["Coca-Cola Orijinal","Coca-Cola Zero"]} },
+  { id:"g330", name:"330 ml Kutu", subs:{"":GAZLI} },
+  { id:"g1l",  name:"1 L PET",     subs:{"":GAZLI} },
+  { id:"g15",  name:"1,5 L PET",   subs:{"":GAZLI} },
+  { id:"g25",  name:"2,5 L PET",   subs:{"":GAZLI} },
+  { id:"fuse", name:"Fuse Tea 330 ml", subs:{"":["Şeftali","Limon","Karpuz","Mango & Ananas"]} },
+  { id:"cappy",name:"Cappy 330 ml", subs:{"":["Vişne","Karışık","Atom"]} },
+  { id:"sch",  name:"Schweppes", subs:{"200 ml":["Tonik","Mandarin"],"1 L":["Tonik","Mandarin"]} },
+  { id:"enerji",name:"Enerji", subs:{"":["Burn","Powerade"]} },
+  { id:"pulpy",name:"Cappy Pulpy", subs:{"330 ml PET":["Portakal"],"1 L":["Portakal","Şeftali","Karışık"]} },
+  { id:"tetra",name:"Tetra Meyve Suyu", subs:{"200 ml":["Atom","Karışık","Şeftali","Vişne"],"1 L":["Atom","Karışık","Şeftali","Vişne","Elma","Kayısı","Portakal"]} },
+  { id:"damla",name:"Damla Su & Soda", subs:{"Su":["0,5 L","1 L","1,5 L"],"Soda":["Sade","Limon","Elma","Karpuz & Çilek","Mango & Ananas"]} }
+];
+function freshCats(){
+  return CATALOG.map(c => { const items=[]; let k=0;
+    for (const [sub,names] of Object.entries(c.subs)) names.forEach(n => items.push({ id:c.id+"-"+(k++), name:n, sub }));
+    return { id:c.id, name:c.name, items }; });
+}
+function fresh(){ return { catVer:2, cats:freshCats(), stores:[], cur:null, counts:{}, done:{}, picked:{}, closed:{}, cat:"g330", view:"saha", mode:"exact" } }
+
+let S; try { S = JSON.parse(localStorage.getItem(KEY)) } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)) } catch(e) {} }
+if (!S || !S.cats) S = fresh();
+if (S.view==="kurulum") S.view="saha";
+S.closed ||= {}; S.history ||= []; S.editing = null;
+/* Katalog güncellemesi (v2): 250 ml Cam'dan Fanta/Sprite çıkar, 1,5 L PET ekle. Kullanıcının eklediği ürünler korunur. */
+if ((S.catVer||1) < 2){
+  const c250 = S.cats.find(c=>c.id==="g250");
+  if (c250){ const gone = c250.items.filter(i=>!i.sub && (i.name==="Fanta"||i.name==="Sprite")).map(i=>i.id);
+    c250.items = c250.items.filter(i=>!gone.includes(i.id)); for (const k in S.counts) gone.forEach(id=>delete S.counts[k][id]); }
+  if (!S.cats.some(c=>c.id==="g15")){
+    const at = S.cats.findIndex(c=>c.id==="g1l");
+    S.cats.splice(at<0?S.cats.length:at+1, 0, { id:"g15", name:"1,5 L PET", items:GAZLI.map((n,k)=>({ id:"g15-"+k, name:n, sub:"" })) });
+  }
+  S.catVer = 2; save();
+}
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+const today = () => new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long"});
+const store = id => S.stores.find(s => s.id === id);
+const cat = () => S.cats.find(c => c.id === S.cat) || S.cats[0];
+const cnt = (sid,iid) => (S.counts[sid]||{})[iid]||0;
+const storeTotal = sid => Object.values(S.counts[sid]||{}).reduce((a,b)=>a+b,0);
+const subsOf = c => [...new Set(c.items.map(i=>i.sub))];
+const label = (c,i) => [c.name, i.sub, i.name].filter(Boolean).join(" · ");
+function toast(t){ const el=$("toast"); el.textContent=t; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,1800) }
+function buzz(){ try { navigator.vibrate && navigator.vibrate(15) } catch(e){} }
+
+/* Toplamlar: hangi mağazalar dahil? */
+function totals(onlyExact, skipDone){
+  const out = {};
+  S.stores.forEach(s => {
+    if (onlyExact && !s.exact) return;
+    if (skipDone && S.done[s.id]) return;
+    for (const [iid,n] of Object.entries(S.counts[s.id]||{})) if (n) out[iid]=(out[iid]||0)+n;
+  });
+  return out;
+}
+const sum = o => Object.values(o).reduce((a,b)=>a+b,0);
+const pendingStores = () => S.stores.filter(s => s.exact && storeTotal(s.id) > 0 && !S.done[s.id]);
+
+/* ---------- RENDER ---------- */
+function render(){
+  $("date").textContent = today();
+  document.querySelectorAll("nav.bottom button").forEach(b => b.setAttribute("aria-current", b.dataset.view===S.view));
+  ["saha","depo","dagit","gecmis","kurulum"].forEach(v => $("v-"+v).hidden = S.view !== v);
+  const fs = store(S.cur), showBar = S.view==="saha" && fs && !S.closed[fs.id] && storeTotal(fs.id) > 0;
+  $("finishBar").hidden = !showBar;
+  if (showBar) $("finishWho").innerHTML = `${fs.exact?"★ ":""}${esc(fs.name)}<small>${storeTotal(fs.id)} adet girildi</small>`;
+  const depoN = sum(totals(true,true)); $("bDepo").textContent = depoN || "";
+  const pend = pendingStores().length; $("bDagit").textContent = pend || "";
+  if (S.view==="saha") renderSaha();
+  if (S.view==="depo") renderDepo();
+  if (S.view==="dagit") renderDagit();
+  if (S.view==="gecmis") renderGecmis();
+  if (S.view==="kurulum"){ $("title").textContent="Kurulum"; $("bigN").textContent=""; $("bigL").textContent="";
+    const android=/android/i.test(navigator.userAgent||""), g=$("guides");
+    if (android && g.firstElementChild?.dataset?.os==="ios") g.appendChild(g.firstElementChild); }
+}
+
+function renderSaha(){
+  $("title").textContent = "Saha";
+  const sel = $("storeSel");
+  sel.innerHTML = S.stores.length
+    ? (S.cur?"":`<option value="" selected>Mağaza seç…</option>`) + S.stores.map(s => `<option value="${s.id}" ${s.id===S.cur?"selected":""}>${S.closed[s.id]?"✓ ":""}${s.exact?"★ ":""}${esc(s.name)}${storeTotal(s.id)?" ("+storeTotal(s.id)+")":""}</option>`).join("")
+    : `<option value="">Henüz mağaza yok</option>`;
+  sel.disabled = !S.stores.length;
+  const s = store(S.cur), locked = s && S.closed[s.id];
+  $("bigN").textContent = s ? storeTotal(s.id) : 0;
+  $("bigL").textContent = "bu mağaza";
+  $("storeInfo").innerHTML = locked
+    ? `<span class="closed-note">✓ Ziyaret kapandı · ${storeTotal(s.id)} adet</span><button class="btn ghost small" id="reopen">Düzenle</button>`
+    : s
+    ? `<label class="chk"><input type="checkbox" id="exactT" ${s.exact?"checked":""}> Birebir değişim</label>
+       <span id="delArea"><button class="link" id="delStore">Mağazayı sil</button></span>`
+    : `<span class="empty">${S.stores.length ? "Listeden mağaza seç ya da" : "Başlamak için"} <b>+ Mağaza</b> ile yeni mağaza ekle.</span>`;
+
+  const fin = S.stores.filter(x => S.closed[x.id]);
+  $("visits").innerHTML = fin.length ? `<div class="card"><h2>Bugün biten ziyaretler</h2><div class="list">${
+    fin.map(x => `<div class="li"><span>✓ ${x.exact?"★ ":""}${esc(x.name)}</span><b>${storeTotal(x.id)}</b></div>`).join("")
+  }</div></div>` : "";
+
+  const c = cat();
+  $("tabs").innerHTML = S.cats.map(g => { const n = s ? g.items.reduce((a,i)=>a+cnt(s.id,i.id),0) : 0;
+    return `<button class="tab" role="tab" data-cat="${g.id}" aria-selected="${g.id===c.id}">${esc(g.name)}${n?`<span class="n">${n}</span>`:""}</button>`; }).join("");
+
+  const subs = subsOf(c);
+  $("grid").innerHTML = subs.map(sub => `${sub?`<h3>${esc(sub)}</h3>`:""}<div class="grid">${
+    c.items.filter(i=>i.sub===sub).map(i => { const n = s ? cnt(s.id,i.id) : 0;
+      return `<div class="prod ${n?"has":""} ${s&&!locked?"":"off"}" role="button" tabindex="0" data-p="${i.id}" aria-label="${esc(label(c,i))}, ${n} adet">
+        <span class="name">${esc(i.name)}</span>${S.editing===i.id && s && !locked
+          ? `<span class="qty"><input type="number" inputmode="numeric" id="qtyIn" min="0" max="9999" value="${n||""}" aria-label="${esc(i.name)} adet"><button class="btn small" data-ok>Tamam</button></span>`
+          : `<span class="cnt" data-edit="${i.id}">${n}</span>`}
+        <button class="minus" data-m="${i.id}" aria-label="${esc(i.name)} azalt" ${n&&!locked?"":"disabled"}>−</button></div>`; }).join("")
+  }</div>`).join("") || `<div class="empty">Bu grupta ürün yok.</div>`;
+
+}
+
+function renderDepo(){
+  $("title").textContent = "Depo";
+  const onlyExact = S.mode === "exact";
+  $("modeExact").setAttribute("aria-pressed", onlyExact); $("modeAll").setAttribute("aria-pressed", !onlyExact);
+  const t = totals(onlyExact, onlyExact);
+  $("bigN").textContent = sum(t); $("bigL").textContent = onlyExact ? "alınacak adet" : "toplam iade";
+  const blocks = S.cats.map(c => {
+    const rows = c.items.filter(i => t[i.id]);
+    if (!rows.length) return "";
+    return `<div class="card"><h2>${esc(c.name)}</h2><div class="list">${rows.map(i => {
+      const on = onlyExact && S.picked[i.id];
+      return onlyExact
+        ? `<div class="li pick ${on?"done":""}" role="checkbox" tabindex="0" aria-checked="${!!on}" data-pick="${i.id}">
+             <span class="box">${on?"✓":""}</span><span class="t">${esc([i.sub,i.name].filter(Boolean).join(" · "))}</span><b>${t[i.id]}</b></div>`
+        : `<div class="li"><span>${esc([i.sub,i.name].filter(Boolean).join(" · "))}</span><b>${t[i.id]}</b></div>`;
+    }).join("")}</div></div>`;
+  }).join("");
+  $("depoList").innerHTML = blocks || `<div class="card empty">${onlyExact
+    ? "Depodan alınacak ürün yok. Birebir değişim (★) işaretli mağazalarda iade girdiğinde ürünler burada toplanır."
+    : "Bugün henüz iade girilmedi."}</div>`;
+  $("clearPick").hidden = !onlyExact || !Object.keys(S.picked).length;
+}
+
+function storeLines(s){
+  const out=[]; S.cats.forEach(c => c.items.forEach(i => { const n=cnt(s.id,i.id); if(n) out.push([label(c,i),n]) })); return out;
+}
+function renderDagit(){
+  $("title").textContent = "Dağıtım";
+  const pend = pendingStores();
+  const done = S.stores.filter(s => s.exact && S.done[s.id]);
+  $("bigN").textContent = pend.length; $("bigL").textContent = "mağaza kaldı";
+  let h = pend.map(s => `<div class="card"><div class="store-head"><h2>${esc(s.name)}</h2><span class="tag">★ ${storeTotal(s.id)} adet</span></div>
+      <div class="list">${storeLines(s).map(l=>`<div class="li"><span>${esc(l[0])}</span><b>${l[1]}</b></div>`).join("")}</div>
+      <button class="btn" data-done="${s.id}">Bıraktım</button></div>`).join("");
+  if (!pend.length) h = `<div class="card empty">${done.length ? "Bütün teslimatlar tamam." : "Birebir değişim (★) isteyen mağazalarda iade girdiğinde, her mağazaya ne götüreceğin burada listelenir."}</div>`;
+  if (done.length) h += `<h3>Teslim edildi</h3>` + done.map(s => `<div class="card done-card"><div class="store-head"><h2>✓ ${esc(s.name)}</h2><button class="btn ghost small" data-undo="${s.id}">Geri al</button></div></div>`).join("");
+  $("dagitList").innerHTML = h;
+}
+
+/* ---------- EVENTS ---------- */
+document.querySelector("nav.bottom").addEventListener("click", e => {
+  const b = e.target.closest("[data-view]"); if (!b) return;
+  S.view = b.dataset.view; save(); render(); window.scrollTo(0,0);
+});
+
+$("storeSel").onchange = e => { S.cur = e.target.value; save(); render(); };
+$("addStoreBtn").onclick = () => { $("storeForm").hidden = false; $("storeName").focus(); };
+$("cancelStore").onclick = () => { $("storeForm").hidden = true; };
+$("saveStore").onclick = () => {
+  const n = $("storeName").value.trim(); if (!n) return toast("Mağaza adını yaz");
+  const s = { id:uid("s"), name:n, exact:$("storeExact").checked };
+  S.stores.push(s); S.cur = s.id;
+  $("storeName").value=""; $("storeExact").checked=false; $("storeForm").hidden=true;
+  save(); render(); toast("Mağaza eklendi: "+n);
+};
+$("storeName").addEventListener("keydown", e => { if (e.key==="Enter") $("saveStore").click() });
+$("storeInfo").addEventListener("change", e => {
+  if (e.target.id==="exactT"){ store(S.cur).exact = e.target.checked; save(); render(); }
+});
+$("storeInfo").addEventListener("click", e => {
+  if (e.target.id==="delStore"){
+    $("delArea").innerHTML = `<span class="row2">Silinsin mi? <button class="btn danger small" id="delYes">Sil</button><button class="btn ghost small" id="delNo">Vazgeç</button></span>`;
+  } else if (e.target.id==="delYes"){
+    const id=S.cur; S.stores=S.stores.filter(s=>s.id!==id); delete S.counts[id]; delete S.done[id]; delete S.closed[id];
+    S.cur = S.stores[0]?.id || null; save(); render(); toast("Mağaza silindi");
+  } else if (e.target.id==="delNo"){ render(); }
+  else if (e.target.id==="reopen"){ delete S.closed[S.cur]; save(); render(); toast("Ziyaret düzenlemeye açıldı"); }
+});
+
+$("tabs").addEventListener("click", e => { const b=e.target.closest("[data-cat]"); if(!b) return; S.cat=b.dataset.cat; save(); render(); });
+
+$("grid").addEventListener("contextmenu", e => { if (e.target.closest("[data-p]")) e.preventDefault() });
+$("grid").addEventListener("click", e => {
+  if (S.cur && S.closed[S.cur] && e.target.closest("[data-p]")) return toast("Ziyaret kapalı. Değiştirmek için Düzenle'ye dokun");
+  const m=e.target.closest("[data-m]");
+  if (m){ const c=S.counts[S.cur]; if(c&&c[m.dataset.m]>0){ c[m.dataset.m]--; S.done[S.cur]=false; save(); render(); } return; }
+  const p=e.target.closest("[data-p]"); if(!p) return;
+  if (!S.cur) return toast("Önce mağaza seç ya da ekle");
+  if (p.dataset.p===S.editing){ if (e.target.closest("[data-ok]")) commitQty(); return; }
+  if (e.target.closest("[data-edit]")){ S.editing=p.dataset.p; render(); const q=$("qtyIn"); if(q){ q.focus(); q.select() } return; }
+  const c = S.counts[S.cur] ||= {}; c[p.dataset.p]=(c[p.dataset.p]||0)+1; markStart(); S.done[S.cur]=false; buzz(); save(); render();
+});
+function markStart(){ if (!S.firstAt) S.firstAt = new Date().toISOString() }
+function commitQty(){
+  const q=$("qtyIn"), id=S.editing; if (!id) return;
+  S.editing=null;
+  if (q && S.cur){ let v=parseInt(q.value,10); if (isNaN(v)||v<0) v=0; if (v>9999) v=9999;
+    const c = S.counts[S.cur] ||= {}; if (v) { c[id]=v; markStart() } else delete c[id]; S.done[S.cur]=false; save(); }
+  render();
+}
+$("grid").addEventListener("focusout", e => { if (e.target.id==="qtyIn") setTimeout(()=>{ if (S.editing && document.activeElement?.id!=="qtyIn") commitQty() }, 0) });
+$("grid").addEventListener("keydown", e => {
+  if (e.target.id!=="qtyIn") return;
+  if (e.key==="Enter"){ e.preventDefault(); commitQty() }
+  if (e.key==="Escape"){ S.editing=null; render() }
+});
+$("grid").addEventListener("keydown", e => { if((e.key==="Enter"||e.key===" ")&&e.target.dataset.p){ e.preventDefault(); e.target.click() } });
+
+
+$("finishBtn").onclick = () => {
+  const s = store(S.cur); if (!s) return;
+  S.closed[s.id] = true; S.cur = null; save(); render(); window.scrollTo(0,0);
+  toast(`${s.name} kapandı · ${storeTotal(s.id)} adet`);
+};
+
+$("modeExact").onclick = () => { S.mode="exact"; save(); render() };
+$("modeAll").onclick = () => { S.mode="all"; save(); render() };
+function togglePick(el){ const id=el.dataset.pick; S.picked[id]=!S.picked[id]; if(!S.picked[id]) delete S.picked[id]; save(); render() }
+$("depoList").addEventListener("click", e => { const r=e.target.closest("[data-pick]"); if(r) togglePick(r) });
+$("depoList").addEventListener("keydown", e => { const r=e.target.closest("[data-pick]"); if(r&&(e.key===" "||e.key==="Enter")){ e.preventDefault(); togglePick(r) } });
+$("clearPick").onclick = () => { S.picked={}; save(); render() };
+
+$("dagitList").addEventListener("click", e => {
+  const d=e.target.closest("[data-done]"), u=e.target.closest("[data-undo]");
+  if (d){ S.done[d.dataset.done]=true; save(); render(); toast("Teslim edildi, listeden düştü") }
+  if (u){ S.done[u.dataset.undo]=false; save(); render() }
+});
+
+async function copy(text){ try { await navigator.clipboard.writeText(text); toast("Kopyalandı") } catch(e){ toast("Kopyalanamadı") } }
+$("copyDepo").onclick = () => {
+  const onlyExact=S.mode==="exact", t=totals(onlyExact,onlyExact), out=[];
+  S.cats.forEach(c => { const r=c.items.filter(i=>t[i.id]); if(r.length){ out.push(c.name+":"); r.forEach(i=>out.push("  "+[i.sub,i.name].filter(Boolean).join(" ")+": "+t[i.id])) } });
+  if(!out.length) return toast("Kopyalanacak ürün yok");
+  copy((onlyExact?"Depodan alınacaklar":"Tüm iadeler")+" – "+today()+"\n"+out.join("\n"));
+};
+$("copyDagit").onclick = () => {
+  const p=pendingStores(); if(!p.length) return toast("Bekleyen teslimat yok");
+  copy("Dağıtım – "+today()+"\n\n"+p.map(s=>s.name+":\n"+storeLines(s).map(l=>"  "+l[0]+": "+l[1]).join("\n")).join("\n\n"));
+};
+
+$("resetArea").addEventListener("click", e => {
+  if (e.target.id==="resetBtn") $("resetArea").innerHTML=`<div class="row2">Emin misin? <button class="btn danger small" id="resetYes">Evet, sıfırla</button><button class="btn ghost small" id="resetNo">Vazgeç</button></div>`;
+  if (e.target.id==="resetNo"||e.target.id==="resetYes"){
+    if (e.target.id==="resetYes"){ const saved=archiveDay(); S.counts={}; S.done={}; S.picked={}; S.closed={}; S.firstAt=null; save(); toast(saved?"Gün geçmişe kaydedildi":"Yeni gün başladı") }
+    $("resetArea").innerHTML=`<button class="btn ghost" id="resetBtn">Yeni güne başla</button>`; render();
+  }
+});
+
+function archiveDay(){
+  const stores = S.stores.filter(s=>storeTotal(s.id)>0).map(s=>({ name:s.name, exact:!!s.exact, total:storeTotal(s.id), lines:storeLines(s) }));
+  if (!stores.length) return false;
+  S.history.unshift({ at:S.firstAt||new Date().toISOString(), total:stores.reduce((a,s)=>a+s.total,0), stores });
+  S.history = S.history.slice(0,120);
+  return true;
+}
+function renderGecmis(){
+  $("title").textContent = "Geçmiş";
+  $("bigN").textContent = S.history.length; $("bigL").textContent = "kayıtlı gün";
+  $("histList").innerHTML = S.history.length ? S.history.map((d,k) => {
+    const dt = new Date(d.at).toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    return `<details class="day" ${k===0?"open":""}><summary><span class="d">${dt}<small>${d.stores.length} mağaza</small></span><b>${d.total}</b></summary>
+      <div class="body">${d.stores.map(s=>`<h3>${s.exact?"★ ":""}${esc(s.name)} · ${s.total} adet</h3><div class="list">${
+        s.lines.map(l=>`<div class="li"><span>${esc(l[0])}</span><b>${l[1]}</b></div>`).join("")}</div>`).join("")}</div></details>`;
+  }).join("") : `<div class="card empty">Henüz kayıtlı gün yok. Gün sonunda Dağıtım ekranındaki <b>Yeni güne başla</b> düğmesine dokunduğunda o günün iadeleri buraya kaydedilir.</div>`;
+}
+
+/* Ekran açık kalsın */
+let wakeLock=null;
+async function keepAwake(){
+  if (wakeLock || !navigator.wakeLock || document.visibilityState!=="visible") return;
+  try { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", ()=>{ wakeLock=null; $("wl").hidden=true }); $("wl").hidden=false }
+  catch(e){ $("wl").hidden=true }
+}
+document.addEventListener("visibilitychange", keepAwake);
+document.addEventListener("pointerdown", keepAwake);
+keepAwake();
+
+/* Kar efekti: 18 hafif tane, yalnızca üst bantta; düğmeyle kapatılabilir */
+(function(){ const box=$("snow"); let h="";
+  for (let k=0;k<18;k++){ const z=(3+Math.random()*4).toFixed(1);
+    h+=`<i style="left:${(Math.random()*100).toFixed(1)}%;width:${z}px;height:${z}px;--dx:${(Math.random()*60-30).toFixed(0)}px;animation-duration:${(6+Math.random()*6).toFixed(1)}s;animation-delay:-${(Math.random()*12).toFixed(1)}s"></i>` }
+  box.innerHTML=h; })();
+function applySnow(){ const on = S.snow!==false; document.body.classList.toggle("nosnow",!on);
+  $("snowBtn").textContent = on ? "❄ Kar açık" : "❄ Kar kapalı"; $("snowBtn").setAttribute("aria-pressed", on) }
+let backView="saha";
+$("helpBtn").onclick = () => { if (S.view!=="kurulum") backView=S.view; S.view="kurulum"; render(); window.scrollTo(0,0) };
+$("helpBack").onclick = () => { S.view=backView; save(); render(); window.scrollTo(0,0) };
+$("snowBtn").onclick = () => { S.snow = S.snow===false; save(); applySnow() };
+applySnow();
+
+render();
+</script>
+
+</body>
+</html>

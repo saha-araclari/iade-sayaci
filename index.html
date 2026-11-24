@@ -58,8 +58,14 @@ select{font-weight:600}
 label.chk{display:flex;gap:10px;align-items:center;font-weight:500;cursor:pointer}
 label.chk input{width:22px;height:22px;accent-color:var(--star)}
 .tag{display:inline-flex;align-items:center;gap:4px;background:var(--star-soft);color:var(--star);border-radius:999px;padding:3px 10px;font-size:.75rem;font-weight:600}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;position:sticky;top:env(safe-area-inset-top,0px);
-  background:var(--bg);padding-block:6px;z-index:5;margin-inline:-4px;padding-inline:4px}
+.catbar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-block:6px;margin-inline:-4px;padding-inline:4px;display:flex;flex-direction:column;gap:8px}
+.mains{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.main{border:0;background:none;color:var(--muted);border-radius:10px;padding:9px 2px;font:700 .72rem var(--display);letter-spacing:.04em;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.main .n{font:600 .68rem var(--body);color:var(--accent);font-variant-numeric:tabular-nums;min-height:1em}
+.main[aria-selected="true"]{background:var(--accent);color:#fff}
+.main[aria-selected="true"] .n{color:#fff}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:9px 14px;font:600 .86rem var(--body);cursor:pointer;display:flex;gap:7px}
 .tab .n{color:var(--accent);font-variant-numeric:tabular-nums}
@@ -143,6 +149,7 @@ body.nosnow .snow{display:none}
 body.nosnow .lights{animation:none}
 @media (prefers-reduced-motion:reduce){.snow{display:none}.lights{animation:none}}
 ol.steps,ul.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;line-height:1.45}
+nav.bottom .badge:empty{display:none}
 .toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.85rem;z-index:30;max-width:90vw}
 button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.prod{transition:none}}
@@ -180,7 +187,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
     </div>
     <div id="visits"></div>
 
-    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <div class="catbar"><div class="mains" id="mains" role="tablist" aria-label="Ürün grubu"></div><nav class="tabs" id="tabs" role="tablist"></nav></div>
     <div id="grid" style="display:flex;flex-direction:column;gap:10px"></div>
 
     <div class="note">Ürüne dokun: +1 · Sağ üstteki − ile azalt</div>
@@ -268,43 +275,47 @@ button:focus-visible,select:focus-visible,input:focus-visible,.prod:focus-visibl
 <script>
 const KEY = "iade-sayaci-v2";
 const GAZLI = ["Coca-Cola Orijinal","Coca-Cola Zero","Fanta","Sprite"];
+const FUSE = ["Şeftali","Limon","Karpuz","Mango & Ananas"];
+const MAINS = [
+  { id:"gazli", name:"GAZLI" }, { id:"fuse", name:"FUSETEA" }, { id:"cappy", name:"CAPPY" },
+  { id:"damla", name:"DAMLA" }, { id:"enerji", name:"ENERJİ" }
+];
+/* Her grubun ürün kimlikleri (idBase-sıra) sabit tutulur; eski sayılar kaybolmaz */
 const CATALOG = [
-  { id:"g250", name:"250 ml Cam",  subs:{"":["Coca-Cola Orijinal","Coca-Cola Zero"]} },
-  { id:"g330", name:"330 ml Kutu", subs:{"":GAZLI} },
-  { id:"g1l",  name:"1 L PET",     subs:{"":GAZLI} },
-  { id:"g15",  name:"1,5 L PET",   subs:{"":GAZLI} },
-  { id:"g25",  name:"2,5 L PET",   subs:{"":GAZLI} },
-  { id:"fuse", name:"Fuse Tea 330 ml", subs:{"":["Şeftali","Limon","Karpuz","Mango & Ananas"]} },
-  { id:"cappy",name:"Cappy 330 ml", subs:{"":["Vişne","Karışık","Atom"]} },
-  { id:"sch",  name:"Schweppes", subs:{"200 ml":["Tonik","Mandarin"],"1 L":["Tonik","Mandarin"]} },
-  { id:"enerji",name:"Enerji", subs:{"":["Burn","Powerade"]} },
-  { id:"pulpy",name:"Cappy Pulpy", subs:{"330 ml PET":["Portakal"],"1 L":["Portakal","Şeftali","Karışık"]} },
-  { id:"tetra",name:"Tetra Meyve Suyu", subs:{"200 ml":["Atom","Karışık","Şeftali","Vişne"],"1 L":["Atom","Karışık","Şeftali","Vişne","Elma","Kayısı","Portakal"]} },
-  { id:"damla",name:"Damla Su & Soda", subs:{"Su":["0,5 L","1 L","1,5 L"],"Soda":["Sade","Limon","Elma","Karpuz & Çilek","Mango & Ananas"]} }
+  { id:"g250", main:"gazli", name:"250 ml Cam",  subs:{"":["Coca-Cola Orijinal","Coca-Cola Zero"]} },
+  { id:"g330", main:"gazli", name:"330 ml Kutu", subs:{"":GAZLI} },
+  { id:"g1l",  main:"gazli", name:"1 L PET",     subs:{"":GAZLI} },
+  { id:"g15",  main:"gazli", name:"1,5 L PET",   subs:{"":GAZLI} },
+  { id:"g25",  main:"gazli", name:"2,5 L PET",   subs:{"":GAZLI} },
+  { id:"sch",  main:"gazli", name:"Schweppes",   subs:{"200 ml":["Tonik","Mandarin"],"1 L":["Tonik","Mandarin"]} },
+  { id:"fuse",   main:"fuse", name:"Fuse Tea 330 ml", tab:"330 ml", subs:{"":FUSE} },
+  { id:"fuse1l", main:"fuse", name:"Fuse Tea 1 L",    tab:"1 L",    subs:{"":[...FUSE,"Kavun & Çilek","Ejder & Çarkıfelek"]} },
+  { id:"fuse15", main:"fuse", name:"Fuse Tea 1,5 L",  tab:"1,5 L",  subs:{"":FUSE} },
+  { id:"cappy", main:"cappy", name:"Cappy 330 ml", subs:{"":["Vişne","Karışık","Atom"]} },
+  { id:"pulpy", main:"cappy", name:"Cappy Pulpy",  subs:{"330 ml PET":["Portakal"],"1 L":["Portakal","Şeftali","Karışık"]} },
+  { id:"tetra", main:"cappy", name:"Tetra Meyve Suyu", tab:"Tetra", subs:{"200 ml":["Atom","Karışık","Şeftali","Vişne"],"1 L":["Atom","Karışık","Şeftali","Vişne","Elma","Kayısı","Portakal"]} },
+  { id:"damla", main:"damla", name:"Damla Su",   tab:"Su",   subs:{"":["0,5 L","1 L","1,5 L"]} },
+  { id:"soda",  main:"damla", name:"Damla Soda", tab:"Soda", idBase:"damla", start:3, subs:{"":["Sade","Limon","Elma","Karpuz & Çilek","Mango & Ananas"]} },
+  { id:"enerji", main:"enerji", name:"Enerji", subs:{"":["Burn","Powerade"]} }
 ];
 function freshCats(){
-  return CATALOG.map(c => { const items=[]; let k=0;
-    for (const [sub,names] of Object.entries(c.subs)) names.forEach(n => items.push({ id:c.id+"-"+(k++), name:n, sub }));
-    return { id:c.id, name:c.name, items }; });
+  return CATALOG.map(c => { const items=[]; let k=c.start||0;
+    for (const [sub,names] of Object.entries(c.subs)) names.forEach(n => items.push({ id:(c.idBase||c.id)+"-"+(k++), name:n, sub }));
+    return { id:c.id, name:c.name, tab:c.tab||c.name, main:c.main, items }; });
 }
-function fresh(){ return { catVer:2, cats:freshCats(), stores:[], cur:null, counts:{}, done:{}, picked:{}, closed:{}, cat:"g330", view:"saha", mode:"exact" } }
+function fresh(){ return { catVer:3, cats:freshCats(), stores:[], cur:null, counts:{}, done:{}, picked:{}, closed:{}, cat:"g330", view:"saha", mode:"exact" } }
 
 let S; try { S = JSON.parse(localStorage.getItem(KEY)) } catch(e) {}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)) } catch(e) {} }
 if (!S || !S.cats) S = fresh();
 if (S.view==="kurulum") S.view="saha";
 S.closed ||= {}; S.history ||= []; S.editing = null;
-/* Katalog güncellemesi (v2): 250 ml Cam'dan Fanta/Sprite çıkar, 1,5 L PET ekle. Kullanıcının eklediği ürünler korunur. */
-if ((S.catVer||1) < 2){
-  const c250 = S.cats.find(c=>c.id==="g250");
-  if (c250){ const gone = c250.items.filter(i=>!i.sub && (i.name==="Fanta"||i.name==="Sprite")).map(i=>i.id);
-    c250.items = c250.items.filter(i=>!gone.includes(i.id)); for (const k in S.counts) gone.forEach(id=>delete S.counts[k][id]); }
-  if (!S.cats.some(c=>c.id==="g15")){
-    const at = S.cats.findIndex(c=>c.id==="g1l");
-    S.cats.splice(at<0?S.cats.length:at+1, 0, { id:"g15", name:"1,5 L PET", items:GAZLI.map((n,k)=>({ id:"g15-"+k, name:n, sub:"" })) });
-  }
-  S.catVer = 2; save();
-}
+/* Ürün listesi her açılışta koddaki katalogdan kurulur; katalogda olmayan ürünlerin sayıları temizlenir */
+S.cats = freshCats(); S.catVer = 3;
+{ const valid = new Set(S.cats.flatMap(c=>c.items.map(i=>i.id)));
+  for (const k in S.counts) for (const id in S.counts[k]) if (!valid.has(id)) delete S.counts[k][id]; }
+if (!S.cats.some(c=>c.id===S.cat)) S.cat = "g330";
+save();
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
@@ -373,8 +384,11 @@ function renderSaha(){
   }</div></div>` : "";
 
   const c = cat();
-  $("tabs").innerHTML = S.cats.map(g => { const n = s ? g.items.reduce((a,i)=>a+cnt(s.id,i.id),0) : 0;
-    return `<button class="tab" role="tab" data-cat="${g.id}" aria-selected="${g.id===c.id}">${esc(g.name)}${n?`<span class="n">${n}</span>`:""}</button>`; }).join("");
+  const gn = g => s ? g.items.reduce((a,i)=>a+cnt(s.id,i.id),0) : 0;
+  $("mains").innerHTML = MAINS.map(m => { const n = S.cats.filter(g=>g.main===m.id).reduce((a,g)=>a+gn(g),0);
+    return `<button class="main" role="tab" data-main="${m.id}" aria-selected="${m.id===c.main}"><span>${m.name}</span><span class="n">${n||""}</span></button>`; }).join("");
+  $("tabs").innerHTML = S.cats.filter(g=>g.main===c.main).map(g => { const n = gn(g);
+    return `<button class="tab" role="tab" data-cat="${g.id}" aria-selected="${g.id===c.id}">${esc(g.tab)}${n?`<span class="n">${n}</span>`:""}</button>`; }).join("");
 
   const subs = subsOf(c);
   $("grid").innerHTML = subs.map(sub => `${sub?`<h3>${esc(sub)}</h3>`:""}<div class="grid">${
@@ -457,6 +471,11 @@ $("storeInfo").addEventListener("click", e => {
   else if (e.target.id==="reopen"){ delete S.closed[S.cur]; save(); render(); toast("Ziyaret düzenlemeye açıldı"); }
 });
 
+S.lastCat ||= {};
+$("mains").addEventListener("click", e => { const b=e.target.closest("[data-main]"); if(!b) return;
+  const m=b.dataset.main; if (m===cat().main) return;
+  S.lastCat[cat().main]=S.cat;
+  S.cat = S.lastCat[m] || S.cats.find(g=>g.main===m).id; save(); render(); });
 $("tabs").addEventListener("click", e => { const b=e.target.closest("[data-cat]"); if(!b) return; S.cat=b.dataset.cat; save(); render(); });
 
 $("grid").addEventListener("contextmenu", e => { if (e.target.closest("[data-p]")) e.preventDefault() });
